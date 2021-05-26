@@ -1,4 +1,4 @@
-use clap::{App, Arg};
+use clap::{arg_enum, value_t, App, Arg};
 use genanki_rs::{Deck, Error, Field, Model, Note, Template};
 use rand::prelude::*;
 use std::borrow::Borrow;
@@ -41,6 +41,14 @@ const ADJ_TMPL: &'static str = r#"{{FrontSide}}
 <p>{{Definition}}</p>
 "#;
 
+arg_enum! {
+    #[derive(PartialEq, Debug)]
+    pub enum Category {
+        Nouns,
+        Adjectives,
+    }
+}
+
 struct Adjective {
     definition: String,
     masc_singular: Option<String>,
@@ -65,6 +73,7 @@ impl Adjective {
     }
 }
 
+/// Return a somewhat, kind-of, more-or-less random ID for an Anki record.
 fn random_id() -> Result<usize, Error> {
     let mut rng = thread_rng();
     let delta: usize = rng.gen_range(0..100);
@@ -74,24 +83,26 @@ fn random_id() -> Result<usize, Error> {
         + delta)
 }
 
+/// Consume a tab-separated file, each line of which must be in the
+/// format "<word>\t<definition>", and return a map between the two.
 fn build_map(file: &str) -> HashMap<String, String> {
     let mut reader = csv::ReaderBuilder::new()
         .delimiter(b'\t')
         .from_path(file)
         .unwrap();
 
-    let mut map: HashMap<String, String> = HashMap::new();
-
-    for result in reader.records() {
-        let record = result.unwrap();
-        let root = record.get(0).unwrap();
-        let definition = record.get(1).unwrap_or("");
-        map.insert(String::from(root), String::from(definition));
-    }
-
-    map
+    reader
+        .records()
+        .map(|r| {
+            let record = r.unwrap();
+            let root = record.get(0).unwrap();
+            let definition = record.get(1).unwrap();
+            (root.to_owned(), definition.to_owned())
+        })
+        .collect()
 }
 
+/// Build an Anki deck based on adjectives
 fn adjectives(word_list: &str, csv_file: &str) -> Result<Deck, Error> {
     let adj_map = build_map(word_list);
 
@@ -180,8 +191,8 @@ fn adjectives(word_list: &str, csv_file: &str) -> Result<Deck, Error> {
     Ok(deck)
 }
 
-#[allow(dead_code)]
-fn plural_nouns(word_list: &str, csv_file: &str) -> Result<Deck, Error> {
+/// Build an Anki deck based on nouns
+fn nouns(word_list: &str, csv_file: &str) -> Result<Deck, Error> {
     let noun_map = build_map(word_list);
 
     let mut deck = Deck::new(
@@ -245,19 +256,10 @@ fn main() -> Result<(), Error> {
         .version("1.0")
         .author("Seth Morabito")
         .arg(
-            Arg::with_name("wordlist")
-                .help("List of words and definitions, tab separated, one per line")
-                .short("w")
-                .long("wordlist")
-                .value_name("FILE")
-                .takes_value(true)
-                .required(true),
-        )
-        .arg(
-            Arg::with_name("csv")
+            Arg::with_name("bindata")
                 .help("BÍN CSV File")
-                .short("c")
-                .long("csv")
+                .short("b")
+                .long("bindata")
                 .value_name("FILE")
                 .takes_value(true)
                 .required(true),
@@ -271,14 +273,31 @@ fn main() -> Result<(), Error> {
                 .takes_value(true)
                 .required(true),
         )
+        .arg(
+            Arg::with_name("category")
+                .help("Wordlist file category ('nouns' or 'adjectives')")
+                .long("category")
+                .value_name("CATEGORY")
+                .takes_value(true)
+                .required(true),
+        )
+        .arg(
+            Arg::with_name("wordlist")
+                .help("List of words and definitions, tab separated, one per line")
+                .required(true),
+        )
         .get_matches();
 
-    let input_file = matches.value_of("wordlist").unwrap();
-    let csv_file = matches.value_of("csv").unwrap();
+    let csv_file = matches.value_of("bindata").unwrap();
     let deck_file = matches.value_of("deck").unwrap();
+    let cat: Category = value_t!(matches, "category", Category).unwrap();
+    let input_file = matches.value_of("wordlist").unwrap();
 
-    // let deck = plural_nouns(input_file, csv_file)?;
-    let deck = adjectives(input_file, csv_file)?;
+    let deck = match cat {
+        Category::Nouns => nouns(input_file, csv_file)?,
+        Category::Adjectives => adjectives(input_file, csv_file)?,
+    };
+
     deck.write_to_file(deck_file)?;
     Ok(())
 }
