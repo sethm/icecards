@@ -1,0 +1,11 @@
+[package]
+name = "binscrape"
+version = "0.1.0"
+authors = ["Seth Morabito <web@loomcom.com>"]
+edition = "2018"
+
+[dependencies]
+genanki-rs = "0.1"
+csv = "1.1"
+rand = "0.8"
+clap = "2"
