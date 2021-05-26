@@ -1,10 +1,69 @@
 use clap::{App, Arg};
 use genanki_rs::{Deck, Error, Field, Model, Note, Template};
 use rand::prelude::*;
+use std::borrow::Borrow;
 use std::collections::HashMap;
 use std::time::SystemTime;
 
-const CSS: &'static str = ".card { font-family: arial; font-size: 20px; text-align: center; color: black; background-color: white; }";
+const CSS: &'static str = "\
+.card {\
+  font-family: arial;\
+  font-size: 20px; \
+  text-align: center;\
+  color: black;\
+  background-color: white;\
+}\
+table {\
+  border-collapse: collapse;\
+  margin-left: auto;\
+  margin-right: auto;\
+  width: 100%;\
+}\
+td {\
+  border: 1px solid #ccc;\
+  padding: 6px;\
+}";
+
+const ADJ_TMPL: &'static str = r#"{{FrontSide}}
+<hr id="forms">
+<table>
+ <tr>
+  <th></th><th>m.</th><th>f.</th><th>n.</th>
+ </tr>
+ <tr>
+  <th>Sg.</th><td>{{MascSg}}</td><td>{{FemSg}}</td><td>{{NeutSg}}</td>
+ </tr>
+ <tr>
+  <th>Pl.</th><td>{{MascPl}}</td><td>{{FemPl}}</td><td>{{NeutPl}}</td>
+ </tr>
+</table>
+<hr id="definition">
+<p>{{Definition}}</p>
+"#;
+
+struct Adjective {
+    definition: String,
+    masc_singular: Option<String>,
+    fem_singular: Option<String>,
+    neut_singular: Option<String>,
+    masc_plural: Option<String>,
+    fem_plural: Option<String>,
+    neut_plural: Option<String>,
+}
+
+impl Adjective {
+    fn new(definition: &str) -> Self {
+        Adjective {
+            definition: String::from(definition),
+            masc_singular: None,
+            fem_singular: None,
+            neut_singular: None,
+            masc_plural: None,
+            fem_plural: None,
+            neut_plural: None,
+        }
+    }
+}
 
 fn random_id() -> Result<usize, Error> {
     let mut rng = thread_rng();
@@ -15,19 +74,115 @@ fn random_id() -> Result<usize, Error> {
         + delta)
 }
 
-fn plural_nouns(word_list: &str, csv_file: &str) -> Result<Deck, Error> {
-    let mut noun_reader = csv::ReaderBuilder::new()
+fn build_map(file: &str) -> HashMap<String, String> {
+    let mut reader = csv::ReaderBuilder::new()
         .delimiter(b'\t')
-        .from_path(word_list)?;
+        .from_path(file)
+        .unwrap();
 
-    let mut noun_map: HashMap<String, String> = HashMap::new();
+    let mut map: HashMap<String, String> = HashMap::new();
 
-    for result in noun_reader.records() {
-        let record = result?;
+    for result in reader.records() {
+        let record = result.unwrap();
         let root = record.get(0).unwrap();
         let definition = record.get(1).unwrap_or("");
-        noun_map.insert(String::from(root), String::from(definition));
+        map.insert(String::from(root), String::from(definition));
     }
+
+    map
+}
+
+fn adjectives(word_list: &str, csv_file: &str) -> Result<Deck, Error> {
+    let adj_map = build_map(word_list);
+
+    let mut deck = Deck::new(
+        random_id()?,
+        "Icelandic Adjectives",
+        "Deck for studying Icelandic adjectives",
+    );
+
+    let model = Model::new_with_options(
+        random_id()?,
+        "Icelandic Adjectives",
+        vec![
+            Field::new("MascSg"),
+            Field::new("FemSg"),
+            Field::new("NeutSg"),
+            Field::new("MascPl"),
+            Field::new("FemPl"),
+            Field::new("NeutPl"),
+            Field::new("Definition"),
+        ],
+        vec![Template::new("Card 1")
+            .qfmt("<h1>{{MascSg}}</h1>")
+            .afmt(ADJ_TMPL)],
+        Some(CSS.clone()),
+        None,
+        None,
+        None,
+        None,
+    );
+
+    let mut db_reader = csv::ReaderBuilder::new()
+        .delimiter(b';')
+        .from_path(csv_file)?;
+
+    let mut adjective_cards: HashMap<String, Adjective> = HashMap::new();
+
+    for result in db_reader.records() {
+        let record = result?;
+        let root = record.get(0).unwrap();
+        let key = record.get(2).unwrap();
+
+        if adj_map.contains_key(root) && key == "lo" {
+            if !adjective_cards.contains_key(root) {
+                let definition = adj_map.get(root).unwrap();
+                adjective_cards.insert(String::from(root), Adjective::new(definition));
+            }
+
+            let card = adjective_cards.get_mut(root).unwrap();
+
+            let form = record.get(5).unwrap();
+            let decl = record.get(4).unwrap().to_owned();
+
+            match form {
+                "FSB-KK-NFET" => card.masc_singular = Some(decl),
+                "FSB-KVK-NFET" => card.fem_singular = Some(decl),
+                "FSB-HK-NFET" => card.neut_singular = Some(decl),
+                "FSB-KK-NFFT" => card.masc_plural = Some(decl),
+                "FSB-KVK-NFFT" => card.fem_plural = Some(decl),
+                "FSB-HK-NFFT" => card.neut_plural = Some(decl),
+                _ => {}
+            }
+        }
+    }
+
+    // Now map over the adjectives and build cards.
+    for (key, val) in adjective_cards {
+        println!("adding {}...", key);
+
+        let note = Note::new(
+            model.clone(),
+            vec![
+                val.masc_singular.unwrap_or(String::from("")).borrow(),
+                val.fem_singular.unwrap_or(String::from("")).borrow(),
+                val.neut_singular.unwrap_or(String::from("")).borrow(),
+                val.masc_plural.unwrap_or(String::from("")).borrow(),
+                val.fem_plural.unwrap_or(String::from("")).borrow(),
+                val.neut_plural.unwrap_or(String::from("")).borrow(),
+                val.definition.borrow(),
+            ],
+        );
+
+        deck.add_note(note.unwrap());
+    }
+
+    Ok(deck)
+}
+
+#[allow(dead_code)]
+fn plural_nouns(word_list: &str, csv_file: &str) -> Result<Deck, Error> {
+    let noun_map = build_map(word_list);
 
     let mut deck = Deck::new(
         random_id()?,
@@ -122,7 +277,8 @@ fn main() -> Result<(), Error> {
     let csv_file = matches.value_of("csv").unwrap();
     let deck_file = matches.value_of("deck").unwrap();
 
-    let deck = plural_nouns(input_file, csv_file)?;
+    // let deck = plural_nouns(input_file, csv_file)?;
+    let deck = adjectives(input_file, csv_file)?;
     deck.write_to_file(deck_file)?;
     Ok(())
 }
