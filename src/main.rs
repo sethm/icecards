@@ -103,17 +103,22 @@ fn build_map(file: &str) -> HashMap<String, String> {
 }
 
 /// Build an Anki deck based on adjectives
-fn adjectives(word_list: &str, csv_file: &str) -> Result<Deck, Error> {
+fn adjectives(
+    word_list: &str,
+    csv_file: &str,
+    deck_id: usize,
+    model_id: usize,
+) -> Result<Deck, Error> {
     let adj_map = build_map(word_list);
 
     let mut deck = Deck::new(
-        random_id()?,
+        deck_id,
         "Icelandic Adjectives",
         "Deck for studying Icelandic adjectives",
     );
 
     let model = Model::new_with_options(
-        random_id()?,
+        model_id,
         "Icelandic Adjectives",
         vec![
             Field::new("MascSg"),
@@ -192,17 +197,17 @@ fn adjectives(word_list: &str, csv_file: &str) -> Result<Deck, Error> {
 }
 
 /// Build an Anki deck based on nouns
-fn nouns(word_list: &str, csv_file: &str) -> Result<Deck, Error> {
+fn nouns(word_list: &str, csv_file: &str, deck_id: usize, model_id: usize) -> Result<Deck, Error> {
     let noun_map = build_map(word_list);
 
     let mut deck = Deck::new(
-        random_id()?,
+        deck_id,
         "Icelandic Noun Plurals",
         "Deck for studying Icelandic noun plurals",
     );
 
     let model = Model::new_with_options(
-        random_id()?,
+        model_id,
         "Noun Plurals",
         vec![
             Field::new("Singular"),
@@ -282,6 +287,22 @@ fn main() -> Result<(), Error> {
                 .required(true),
         )
         .arg(
+            Arg::with_name("deck-id")
+                .help("Optional numeric ID for the generated Anki deck")
+                .long("deck-id")
+                .value_name("ID")
+                .takes_value(true)
+                .required(false),
+        )
+        .arg(
+            Arg::with_name("model-id")
+                .help("Optional numeric ID for the generated Anki model")
+                .long("model-id")
+                .value_name("ID")
+                .takes_value(true)
+                .required(false),
+        )
+        .arg(
             Arg::with_name("wordlist")
                 .help("List of words and definitions, tab separated, one per line")
                 .required(true),
@@ -290,12 +311,26 @@ fn main() -> Result<(), Error> {
 
     let csv_file = matches.value_of("bindata").unwrap();
     let deck_file = matches.value_of("deck").unwrap();
-    let cat: Category = value_t!(matches, "category", Category).unwrap();
+    let category: Category = value_t!(matches, "category", Category).unwrap();
     let input_file = matches.value_of("wordlist").unwrap();
+    let deck_id = match matches.value_of("deck-id") {
+        Some(id) => id.parse::<usize>().unwrap(),
+        None => random_id().unwrap(),
+    };
+    let model_id = match matches.value_of("model-id") {
+        Some(id) => id.parse::<usize>().unwrap(),
+        None => random_id().unwrap(),
+    };
 
-    let deck = match cat {
-        Category::Nouns => nouns(input_file, csv_file)?,
-        Category::Adjectives => adjectives(input_file, csv_file)?,
+    println!(
+        "Generating Anki deck with id `{}`, model id `{}`.",
+        deck_id, model_id
+    );
+
+    // TODO: A builder pattern would probably be nice here.
+    let deck = match category {
+        Category::Nouns => nouns(input_file, csv_file, deck_id, model_id)?,
+        Category::Adjectives => adjectives(input_file, csv_file, deck_id, model_id)?,
     };
 
     deck.write_to_file(deck_file)?;
