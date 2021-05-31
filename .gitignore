@@ -1,3 +1,4 @@
 /target
 /.idea
+/build.sh
 .DS_Store
