@@ -1,11 +1,16 @@
-use clap::{arg_enum, value_t, App, Arg};
-use genanki_rs::{Deck, Error, Field, Model, Note, Template};
-use rand::prelude::*;
 use std::borrow::Borrow;
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::time::SystemTime;
 
-const CSS: &'static str = "\
+use crate::dictionary::Definition;
+use clap::{arg_enum, value_t, App, Arg};
+use csv::{ReaderBuilder, WriterBuilder};
+use genanki_rs::{Deck, Error, Field, Model, Note, Template};
+use rand::prelude::*;
+
+mod dictionary;
+
+const CSS: &str = "\
 .card {\
   font-family: arial;\
   font-size: 20px; \
@@ -24,7 +29,7 @@ td {\
   padding: 6px;\
 }";
 
-const ADJ_TMPL: &'static str = r#"{{FrontSide}}
+const ADJ_TMPL: &str = r#"{{FrontSide}}
 <hr id="forms">
 <table>
  <tr>
@@ -38,8 +43,7 @@ const ADJ_TMPL: &'static str = r#"{{FrontSide}}
  </tr>
 </table>
 <hr id="definition">
-<p>{{Definition}}</p>
-"#;
+<p>{{Definition}}</p>"#;
 
 arg_enum! {
     #[derive(PartialEq, Debug)]
@@ -50,7 +54,7 @@ arg_enum! {
 }
 
 struct Adjective {
-    definition: String,
+    definition: Definition,
     masc_singular: Option<String>,
     fem_singular: Option<String>,
     neut_singular: Option<String>,
@@ -60,9 +64,9 @@ struct Adjective {
 }
 
 impl Adjective {
-    fn new(definition: &str) -> Self {
+    fn new(definition: Definition) -> Self {
         Adjective {
-            definition: String::from(definition),
+            definition,
             masc_singular: None,
             fem_singular: None,
             neut_singular: None,
@@ -77,45 +81,52 @@ impl Adjective {
 fn random_id() -> Result<usize, Error> {
     let mut rng = thread_rng();
     let delta: usize = rng.gen_range(0..100);
-    Ok(SystemTime::now()
-        .duration_since(SystemTime::UNIX_EPOCH)?
-        .as_millis() as usize
-        + delta)
+    Ok(SystemTime::now().duration_since(SystemTime::UNIX_EPOCH)?.as_millis() as usize + delta)
 }
 
-/// Consume a tab-separated file, each line of which must be in the
-/// format "<word>\t<definition>", and return a map between the two.
-fn build_map(file: &str) -> HashMap<String, String> {
-    let mut reader = csv::ReaderBuilder::new()
-        .delimiter(b'\t')
-        .from_path(file)
-        .unwrap();
+async fn read_word_map(file_name: &str) -> BTreeMap<String, Definition> {
+    let client = reqwest::Client::new();
+    let mut result: BTreeMap<String, Definition> = BTreeMap::new();
 
-    reader
-        .records()
-        .map(|r| {
-            let record = r.unwrap();
-            let root = record.get(0).unwrap();
-            let definition = record.get(1).unwrap();
-            (root.to_owned(), definition.to_owned())
-        })
-        .collect()
+    if let Ok(mut reader) =
+        ReaderBuilder::new().has_headers(false).delimiter(b'\t').flexible(true).from_path(file_name)
+    {
+        for record in reader.records().flatten() {
+            if let Some(root) = record.get(0) {
+                // TODO: Error Handling
+                let definition = match record.get(1) {
+                    Some(json) => serde_json::from_str::<Definition>(json).unwrap(),
+                    None => dictionary::search(&client, &root).await.unwrap(),
+                };
+
+                result.insert(root.to_owned(), definition);
+            }
+        }
+    }
+
+    result
+}
+
+fn update_word_map(file_name: &str, word_map: &BTreeMap<String, Definition>) {
+    if let Ok(mut writer) =
+        WriterBuilder::new().has_headers(false).delimiter(b'\t').from_path(file_name)
+    {
+        word_map.iter().for_each(|(k, v)| {
+            let definition = serde_json::to_string(v).unwrap();
+            let _ = writer.write_record(&[k, &definition]);
+        });
+    }
 }
 
 /// Build an Anki deck based on adjectives
 fn adjectives(
-    word_list: &str,
+    word_map: &BTreeMap<String, Definition>,
     csv_file: &str,
     deck_id: usize,
     model_id: usize,
 ) -> Result<Deck, Error> {
-    let adj_map = build_map(word_list);
-
-    let mut deck = Deck::new(
-        deck_id,
-        "Icelandic Adjectives",
-        "Deck for studying Icelandic adjectives",
-    );
+    let mut deck =
+        Deck::new(deck_id, "Icelandic Adjectives", "Deck for studying Icelandic adjectives");
 
     let model = Model::new_with_options(
         model_id,
@@ -129,64 +140,60 @@ fn adjectives(
             Field::new("NeutPl"),
             Field::new("Definition"),
         ],
-        vec![Template::new("Card 1")
-            .qfmt("<h1>{{MascSg}}</h1>")
-            .afmt(ADJ_TMPL)],
-        Some(CSS.clone()),
+        vec![Template::new("Card 1").qfmt("<h1>{{MascSg}}</h1>").afmt(ADJ_TMPL)],
+        Some(CSS),
         None,
         None,
         None,
         None,
     );
 
-    let mut db_reader = csv::ReaderBuilder::new()
-        .delimiter(b';')
-        .from_path(csv_file)?;
+    let mut db_reader =
+        ReaderBuilder::new().has_headers(false).delimiter(b';').from_path(csv_file)?;
 
-    let mut adjective_cards: HashMap<String, Adjective> = HashMap::new();
+    let mut adjective_cards: BTreeMap<String, Adjective> = BTreeMap::new();
 
     for result in db_reader.records() {
         let record = result?;
         let root = record.get(0).unwrap();
         let key = record.get(2).unwrap();
 
-        if adj_map.contains_key(root) && key == "lo" {
+        if word_map.contains_key(root) && key == "lo" {
             if !adjective_cards.contains_key(root) {
-                let definition = adj_map.get(root).unwrap();
-                adjective_cards.insert(String::from(root), Adjective::new(definition));
+                if let Some(definition) = word_map.get(root) {
+                    adjective_cards.insert(String::from(root), Adjective::new(definition.clone()));
+                }
             }
 
-            let card = adjective_cards.get_mut(root).unwrap();
+            if let Some(card) = adjective_cards.get_mut(root) {
+                let form = record.get(5).unwrap();
+                let decl = record.get(4).unwrap().to_owned();
 
-            let form = record.get(5).unwrap();
-            let decl = record.get(4).unwrap().to_owned();
-
-            match form {
-                "FSB-KK-NFET" => card.masc_singular = Some(decl),
-                "FSB-KVK-NFET" => card.fem_singular = Some(decl),
-                "FSB-HK-NFET" => card.neut_singular = Some(decl),
-                "FSB-KK-NFFT" => card.masc_plural = Some(decl),
-                "FSB-KVK-NFFT" => card.fem_plural = Some(decl),
-                "FSB-HK-NFFT" => card.neut_plural = Some(decl),
-                _ => {}
+                match form {
+                    "FSB-KK-NFET" => card.masc_singular = Some(decl),
+                    "FSB-KVK-NFET" => card.fem_singular = Some(decl),
+                    "FSB-HK-NFET" => card.neut_singular = Some(decl),
+                    "FSB-KK-NFFT" => card.masc_plural = Some(decl),
+                    "FSB-KVK-NFFT" => card.fem_plural = Some(decl),
+                    "FSB-HK-NFFT" => card.neut_plural = Some(decl),
+                    _ => {}
+                }
             }
         }
     }
 
     // Now map over the adjectives and build cards.
-    for (key, val) in adjective_cards {
-        println!("adding {}...", key);
-
+    for (_, val) in adjective_cards {
         let note = Note::new(
             model.clone(),
             vec![
-                val.masc_singular.unwrap_or(String::from("")).borrow(),
-                val.fem_singular.unwrap_or(String::from("")).borrow(),
-                val.neut_singular.unwrap_or(String::from("")).borrow(),
-                val.masc_plural.unwrap_or(String::from("")).borrow(),
-                val.fem_plural.unwrap_or(String::from("")).borrow(),
-                val.neut_plural.unwrap_or(String::from("")).borrow(),
-                val.definition.borrow(),
+                val.masc_singular.unwrap_or_else(String::new).borrow(),
+                val.fem_singular.unwrap_or_else(String::new).borrow(),
+                val.neut_singular.unwrap_or_else(String::new).borrow(),
+                val.masc_plural.unwrap_or_else(String::new).borrow(),
+                val.fem_plural.unwrap_or_else(String::new).borrow(),
+                val.neut_plural.unwrap_or_else(String::new).borrow(),
+                &val.definition.to_string(),
             ],
         );
 
@@ -197,14 +204,14 @@ fn adjectives(
 }
 
 /// Build an Anki deck based on nouns
-fn nouns(word_list: &str, csv_file: &str, deck_id: usize, model_id: usize) -> Result<Deck, Error> {
-    let noun_map = build_map(word_list);
-
-    let mut deck = Deck::new(
-        deck_id,
-        "Icelandic Noun Plurals",
-        "Deck for studying Icelandic noun plurals",
-    );
+fn nouns(
+    word_map: &BTreeMap<String, Definition>,
+    csv_file: &str,
+    deck_id: usize,
+    model_id: usize,
+) -> Result<Deck, Error> {
+    let mut deck =
+        Deck::new(deck_id, "Icelandic Noun Plurals", "Deck for studying Icelandic noun plurals");
 
     let model = Model::new_with_options(
         model_id,
@@ -218,16 +225,15 @@ fn nouns(word_list: &str, csv_file: &str, deck_id: usize, model_id: usize) -> Re
         vec![Template::new("Card 1")
             .qfmt("<h1>{{Singular}}</h1>")
             .afmt(r#"{{FrontSide}}<hr id="plural"><h2>{{Plural}} ({{Gender}})</h2> <p>{{Definition}}</p>"#)],
-        Some(CSS.clone()),
+        Some(CSS),
         None,
         None,
         None,
         None,
     );
 
-    let mut db_reader = csv::ReaderBuilder::new()
-        .delimiter(b';')
-        .from_path(csv_file)?;
+    let mut db_reader =
+        ReaderBuilder::new().has_headers(false).delimiter(b';').from_path(csv_file)?;
 
     for result in db_reader.records() {
         let record = result?;
@@ -236,8 +242,7 @@ fn nouns(word_list: &str, csv_file: &str, deck_id: usize, model_id: usize) -> Re
 
         if "alm" == class && "NFFT" == form {
             if let Some(root) = record.get(0) {
-                if noun_map.contains_key(root) {
-                    println!("adding {}...", root);
+                if word_map.contains_key(root) {
                     let gender = match record.get(2).unwrap() {
                         "kk" => "masc.",
                         "hk" => "neut.",
@@ -245,9 +250,13 @@ fn nouns(word_list: &str, csv_file: &str, deck_id: usize, model_id: usize) -> Re
                         _ => "...",
                     };
                     let plural = record.get(4).unwrap();
-                    let definition = noun_map.get(root).unwrap();
-                    let note = Note::new(model.clone(), vec![root, plural, gender, definition]);
-                    deck.add_note(note.unwrap());
+                    if let Some(definition) = word_map.get(root) {
+                        let note = Note::new(
+                            model.clone(),
+                            vec![root, plural, gender, &definition.to_string()],
+                        );
+                        deck.add_note(note.unwrap());
+                    }
                 }
             }
         }
@@ -256,7 +265,8 @@ fn nouns(word_list: &str, csv_file: &str, deck_id: usize, model_id: usize) -> Re
     Ok(deck)
 }
 
-fn main() -> Result<(), Error> {
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let matches = App::new("BÍN Scraper")
         .version("1.0")
         .author("Seth Morabito")
@@ -322,17 +332,25 @@ fn main() -> Result<(), Error> {
         None => random_id().unwrap(),
     };
 
-    println!(
-        "Generating Anki deck with id `{}`, model id `{}`.",
-        deck_id, model_id
-    );
+    println!("Generating Anki deck with id `{}`, model id `{}`.", deck_id, model_id);
+
+    println!("Loading {}...", input_file);
+    let word_map = read_word_map(input_file).await;
 
     // TODO: A builder pattern would probably be nice here.
+    println!("Starting Anki deck generation...");
     let deck = match category {
-        Category::Nouns => nouns(input_file, csv_file, deck_id, model_id)?,
-        Category::Adjectives => adjectives(input_file, csv_file, deck_id, model_id)?,
+        Category::Nouns => nouns(&word_map, csv_file, deck_id, model_id)?,
+        Category::Adjectives => adjectives(&word_map, csv_file, deck_id, model_id)?,
     };
 
+    println!("Saving Anki deck...");
     deck.write_to_file(deck_file)?;
+
+    // TODO: Back up original file
+    println!("Updating {}...", input_file);
+    update_word_map(input_file, &word_map);
+
+    println!("Done!");
     Ok(())
 }
