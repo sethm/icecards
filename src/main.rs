@@ -1,14 +1,27 @@
 use std::borrow::Borrow;
-use std::collections::BTreeMap;
-use std::time::SystemTime;
+use std::time::{SystemTime, SystemTimeError};
 
-use crate::dictionary::Definition;
-use clap::{arg_enum, value_t, App, Arg};
-use csv::{ReaderBuilder, WriterBuilder};
-use genanki_rs::{Deck, Error, Field, Model, Note, Template};
+use crate::bindata::{BinData, Gender};
+use crate::dictionary::{Category, Dictionary, DictionaryEntry};
+use clap::{App, Arg};
+use directories_next::ProjectDirs;
+use genanki_rs::{Deck, Field, Model, Note, Template};
 use rand::prelude::*;
+use std::fs::File;
+use std::io::{self, Write};
+use std::path::{Path, PathBuf};
+use tempfile::tempfile;
+use thiserror::Error;
+use zip::result::ZipError;
 
+mod bindata;
 mod dictionary;
+
+const DEFAULT_BIN_CSV: &str = "SHsnid.csv";
+const DEFAULT_DECK: &str = "deck.apkg";
+const BIN_CSV_URL: &str = "https://bin.arnastofnun.is/django/api/nidurhal/?file=SHsnid.csv.zip";
+const NOUN_MODEL_ID: usize = 1625673414000;
+const ADJECTIVE_MODEL_ID: usize = 1625673415000;
 
 const CSS: &str = "\
 .card {\
@@ -45,91 +58,47 @@ const ADJ_TMPL: &str = r#"{{FrontSide}}
 <hr id="definition">
 <p>{{Definition}}</p>"#;
 
-arg_enum! {
-    #[derive(PartialEq, Debug)]
-    pub enum Category {
-        Nouns,
-        Adjectives,
-    }
-}
-
-struct Adjective {
-    definition: Definition,
-    masc_singular: Option<String>,
-    fem_singular: Option<String>,
-    neut_singular: Option<String>,
-    masc_plural: Option<String>,
-    fem_plural: Option<String>,
-    neut_plural: Option<String>,
-}
-
-impl Adjective {
-    fn new(definition: Definition) -> Self {
-        Adjective {
-            definition,
-            masc_singular: None,
-            fem_singular: None,
-            neut_singular: None,
-            masc_plural: None,
-            fem_plural: None,
-            neut_plural: None,
-        }
-    }
+#[derive(Error, Debug)]
+pub enum ProgramError {
+    #[error("cannot access configuration")]
+    Configuration,
+    #[error("invalid dictionary file")]
+    Dictionary,
+    #[error("io error")]
+    Io(#[from] io::Error),
+    #[error("network error")]
+    Network(#[from] reqwest::Error),
+    #[error("zip error")]
+    Zip(#[from] ZipError),
+    #[error("bin data file does not exist")]
+    BinData,
+    #[error("system time")]
+    SystemTime(#[from] SystemTimeError),
+    #[error("CSV parse failed")]
+    Csv(#[from] csv::Error),
+    #[error("Serialization")]
+    Serialization(#[from] serde_json::Error),
+    #[error("Anki Generation")]
+    Anki(#[from] genanki_rs::Error),
 }
 
 /// Return a somewhat, kind-of, more-or-less random ID for an Anki record.
-fn random_id() -> Result<usize, Error> {
+fn random_id() -> Result<usize, ProgramError> {
     let mut rng = thread_rng();
     let delta: usize = rng.gen_range(0..100);
     Ok(SystemTime::now().duration_since(SystemTime::UNIX_EPOCH)?.as_millis() as usize + delta)
 }
 
-async fn read_word_map(file_name: &str) -> BTreeMap<String, Definition> {
-    let client = reqwest::Client::new();
-    let mut result: BTreeMap<String, Definition> = BTreeMap::new();
-
-    if let Ok(mut reader) =
-        ReaderBuilder::new().has_headers(false).delimiter(b'\t').flexible(true).from_path(file_name)
-    {
-        for record in reader.records().flatten() {
-            if let Some(root) = record.get(0) {
-                // TODO: Error Handling
-                let definition = match record.get(1) {
-                    Some(json) => serde_json::from_str::<Definition>(json).unwrap(),
-                    None => dictionary::search(&client, &root).await.unwrap(),
-                };
-
-                result.insert(root.to_owned(), definition);
-            }
-        }
-    }
-
-    result
-}
-
-fn update_word_map(file_name: &str, word_map: &BTreeMap<String, Definition>) {
-    if let Ok(mut writer) =
-        WriterBuilder::new().has_headers(false).delimiter(b'\t').from_path(file_name)
-    {
-        word_map.iter().for_each(|(k, v)| {
-            let definition = serde_json::to_string(v).unwrap();
-            let _ = writer.write_record(&[k, &definition]);
-        });
-    }
-}
-
-/// Build an Anki deck based on adjectives
-fn adjectives(
-    word_map: &BTreeMap<String, Definition>,
-    csv_file: &str,
-    deck_id: usize,
-    model_id: usize,
-) -> Result<Deck, Error> {
+fn generate_deck(
+    dictionary: &Dictionary,
+    bin_data: &BinData,
+    config: &AppConfig,
+) -> Result<Deck, ProgramError> {
     let mut deck =
-        Deck::new(deck_id, "Icelandic Adjectives", "Deck for studying Icelandic adjectives");
+        Deck::new(config.deck_id, "Icelandic Vocabulary", "Deck for studying Icelandic Vocabulary");
 
-    let model = Model::new_with_options(
-        model_id,
+    let adjective_model = Model::new_with_options(
+        ADJECTIVE_MODEL_ID,
         "Icelandic Adjectives",
         vec![
             Field::new("MascSg"),
@@ -148,83 +117,19 @@ fn adjectives(
         None,
     );
 
-    let mut db_reader =
-        ReaderBuilder::new().has_headers(false).delimiter(b';').from_path(csv_file)?;
-
-    let mut adjective_cards: BTreeMap<String, Adjective> = BTreeMap::new();
-
-    for result in db_reader.records() {
-        let record = result?;
-        let root = record.get(0).unwrap();
-        let key = record.get(2).unwrap();
-
-        if word_map.contains_key(root) && key == "lo" {
-            if !adjective_cards.contains_key(root) {
-                if let Some(definition) = word_map.get(root) {
-                    adjective_cards.insert(String::from(root), Adjective::new(definition.clone()));
-                }
-            }
-
-            if let Some(card) = adjective_cards.get_mut(root) {
-                let form = record.get(5).unwrap();
-                let decl = record.get(4).unwrap().to_owned();
-
-                match form {
-                    "FSB-KK-NFET" => card.masc_singular = Some(decl),
-                    "FSB-KVK-NFET" => card.fem_singular = Some(decl),
-                    "FSB-HK-NFET" => card.neut_singular = Some(decl),
-                    "FSB-KK-NFFT" => card.masc_plural = Some(decl),
-                    "FSB-KVK-NFFT" => card.fem_plural = Some(decl),
-                    "FSB-HK-NFFT" => card.neut_plural = Some(decl),
-                    _ => {}
-                }
-            }
-        }
-    }
-
-    // Now map over the adjectives and build cards.
-    for (_, val) in adjective_cards {
-        let note = Note::new(
-            model.clone(),
-            vec![
-                val.masc_singular.unwrap_or_else(String::new).borrow(),
-                val.fem_singular.unwrap_or_else(String::new).borrow(),
-                val.neut_singular.unwrap_or_else(String::new).borrow(),
-                val.masc_plural.unwrap_or_else(String::new).borrow(),
-                val.fem_plural.unwrap_or_else(String::new).borrow(),
-                val.neut_plural.unwrap_or_else(String::new).borrow(),
-                &val.definition.to_string(),
-            ],
-        );
-
-        deck.add_note(note.unwrap());
-    }
-
-    Ok(deck)
-}
-
-/// Build an Anki deck based on nouns
-fn nouns(
-    word_map: &BTreeMap<String, Definition>,
-    csv_file: &str,
-    deck_id: usize,
-    model_id: usize,
-) -> Result<Deck, Error> {
-    let mut deck =
-        Deck::new(deck_id, "Icelandic Noun Plurals", "Deck for studying Icelandic noun plurals");
-
-    let model = Model::new_with_options(
-        model_id,
+    let noun_model = Model::new_with_options(
+        NOUN_MODEL_ID,
         "Noun Plurals",
         vec![
-            Field::new("Singular"),
-            Field::new("Plural"),
+            Field::new("NomSg"),
+            Field::new("GenSg"),
+            Field::new("NomPl"),
             Field::new("Gender"),
             Field::new("Definition"),
         ],
         vec![Template::new("Card 1")
-            .qfmt("<h1>{{Singular}}</h1>")
-            .afmt(r#"{{FrontSide}}<hr id="plural"><h2>{{Plural}} ({{Gender}})</h2> <p>{{Definition}}</p>"#)],
+            .qfmt("<h1>{{NomSg}}</h1>")
+            .afmt(r#"{{FrontSide}}<hr id="gender"/><h2>{{Gender}}</h2><hr id="forms"/><h2><em>g. sg.</em> {{GenSg}}, <em>n. pl.</em> {{NomPl}}</h2> <p>{{Definition}}</p>"#)],
         Some(CSS),
         None,
         None,
@@ -232,31 +137,17 @@ fn nouns(
         None,
     );
 
-    let mut db_reader =
-        ReaderBuilder::new().has_headers(false).delimiter(b';').from_path(csv_file)?;
-
-    for result in db_reader.records() {
-        let record = result?;
-        let form = record.get(5).unwrap();
-        let class = record.get(3).unwrap();
-
-        if "alm" == class && "NFFT" == form {
-            if let Some(root) = record.get(0) {
-                if word_map.contains_key(root) {
-                    let gender = match record.get(2).unwrap() {
-                        "kk" => "masc.",
-                        "hk" => "neut.",
-                        "kvk" => "fem.",
-                        _ => "...",
-                    };
-                    let plural = record.get(4).unwrap();
-                    if let Some(definition) = word_map.get(root) {
-                        let note = Note::new(
-                            model.clone(),
-                            vec![root, plural, gender, &definition.to_string()],
-                        );
-                        deck.add_note(note.unwrap());
-                    }
+    for (root, dictionary_entry) in &dictionary.entries {
+        match dictionary_entry.category {
+            Category::Noun => {
+                if let Some(note) = noun(&root, bin_data, &dictionary_entry, &noun_model) {
+                    deck.add_note(note)
+                }
+            }
+            Category::Adjective => {
+                if let Some(note) = adjective(&root, bin_data, &dictionary_entry, &adjective_model)
+                {
+                    deck.add_note(note)
                 }
             }
         }
@@ -265,19 +156,73 @@ fn nouns(
     Ok(deck)
 }
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let matches = App::new("BÍN Scraper")
+fn adjective(
+    root: &str,
+    bin_data: &BinData,
+    dictionary_entry: &DictionaryEntry,
+    model: &Model,
+) -> Option<Note> {
+    match bin_data.adjective(root) {
+        Some(adjective_entry) => Some(
+            Note::new(
+                model.clone(),
+                vec![
+                    adjective_entry.masc_nom_sg_strong.unwrap_or("—".to_string()).borrow(),
+                    adjective_entry.fem_nom_sg_strong.unwrap_or("—".to_string()).borrow(),
+                    adjective_entry.neut_nom_sg_strong.unwrap_or("—".to_string()).borrow(),
+                    adjective_entry.masc_nom_pl_strong.unwrap_or("—".to_string()).borrow(),
+                    adjective_entry.fem_nom_pl_strong.unwrap_or("—".to_string()).borrow(),
+                    adjective_entry.neut_nom_pl_strong.unwrap_or("—".to_string()).borrow(),
+                    &dictionary_entry.definition(),
+                ],
+            )
+            .unwrap(),
+        ),
+        _ => None,
+    }
+}
+
+fn noun(
+    root: &str,
+    bin_data: &BinData,
+    dictionary_entry: &DictionaryEntry,
+    model: &Model,
+) -> Option<Note> {
+    match bin_data.noun(root) {
+        Some(noun_entry) => Some(
+            Note::new(
+                model.clone(),
+                vec![
+                    root,
+                    noun_entry.gen_sg.unwrap_or("—".to_string()).borrow(),
+                    noun_entry.nom_pl.unwrap_or("—".to_string()).borrow(),
+                    match noun_entry.gender {
+                        Gender::Masculine => "Masculine",
+                        Gender::Feminine => "Feminine",
+                        Gender::Neuter => "Neuter",
+                    },
+                    &dictionary_entry.definition(),
+                ],
+            )
+            .unwrap(),
+        ),
+        _ => None,
+    }
+}
+
+/// Read application config from command line arguments.
+fn app_config(project_dirs: &ProjectDirs) -> AppConfig {
+    let arg_matches = App::new("Icelandic Anki Flashcard Generator")
         .version("1.0")
         .author("Seth Morabito")
         .arg(
-            Arg::with_name("bindata")
-                .help("BÍN CSV File")
-                .short("b")
-                .long("bindata")
-                .value_name("FILE")
+            Arg::with_name("binurl")
+                .help("URL to fetch BÍN CSV")
+                .long("binurl")
+                .value_name("URL")
                 .takes_value(true)
-                .required(true),
+                .default_value(BIN_CSV_URL)
+                .required(false),
         )
         .arg(
             Arg::with_name("deck")
@@ -285,16 +230,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .short("d")
                 .long("deck")
                 .value_name("FILE")
-                .takes_value(true)
-                .required(true),
-        )
-        .arg(
-            Arg::with_name("category")
-                .help("Wordlist file category ('nouns' or 'adjectives')")
-                .long("category")
-                .value_name("CATEGORY")
-                .takes_value(true)
-                .required(true),
+                .default_value("deck.apkg")
+                .takes_value(true),
         )
         .arg(
             Arg::with_name("deck-id")
@@ -305,52 +242,174 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .required(false),
         )
         .arg(
-            Arg::with_name("model-id")
-                .help("Optional numeric ID for the generated Anki model")
-                .long("model-id")
-                .value_name("ID")
-                .takes_value(true)
-                .required(false),
-        )
-        .arg(
             Arg::with_name("wordlist")
-                .help("List of words and definitions, tab separated, one per line")
+                .help("List of words and categories, tab separated, one per line")
                 .required(true),
         )
         .get_matches();
 
-    let csv_file = matches.value_of("bindata").unwrap();
-    let deck_file = matches.value_of("deck").unwrap();
-    let category: Category = value_t!(matches, "category", Category).unwrap();
-    let input_file = matches.value_of("wordlist").unwrap();
-    let deck_id = match matches.value_of("deck-id") {
+    let dictionary = project_dirs.data_dir().join("dictionary.json");
+    let bin_data: PathBuf = project_dirs.data_dir().join(DEFAULT_BIN_CSV);
+
+    let bin_csv_url = match arg_matches.value_of("binurl") {
+        Some(binurl) => binurl.to_string(),
+        None => BIN_CSV_URL.to_string(),
+    };
+
+    let deck: String = match arg_matches.value_of("deck") {
+        Some(deck) => deck.to_string(),
+        None => DEFAULT_DECK.to_string(),
+    };
+
+    let wordlist: PathBuf = match arg_matches.value_of("wordlist") {
+        Some(wordlist) => Path::new(wordlist).to_path_buf(),
+        None => Path::new("wordlist.txt").to_path_buf(),
+    };
+
+    let deck_id = match arg_matches.value_of("deck-id") {
         Some(id) => id.parse::<usize>().unwrap(),
         None => random_id().unwrap(),
     };
-    let model_id = match matches.value_of("model-id") {
-        Some(id) => id.parse::<usize>().unwrap(),
-        None => random_id().unwrap(),
-    };
 
-    println!("Generating Anki deck with id `{}`, model id `{}`.", deck_id, model_id);
+    AppConfig { bin_csv_url, bin_data, dictionary, deck, wordlist, deck_id }
+}
 
-    println!("Loading {}...", input_file);
-    let word_map = read_word_map(input_file).await;
+#[derive(Debug)]
+struct AppConfig {
+    bin_csv_url: String,
+    bin_data: PathBuf,
+    dictionary: PathBuf,
+    deck: String,
+    wordlist: PathBuf,
+    deck_id: usize,
+}
 
-    // TODO: A builder pattern would probably be nice here.
-    println!("Starting Anki deck generation...");
-    let deck = match category {
-        Category::Nouns => nouns(&word_map, csv_file, deck_id, model_id)?,
-        Category::Adjectives => adjectives(&word_map, csv_file, deck_id, model_id)?,
-    };
+fn setup_project_dirs(project_dirs: &ProjectDirs) -> Result<(), ProgramError> {
+    let data_dir = project_dirs.data_dir();
+    let config_dir = project_dirs.config_dir();
+    std::fs::create_dir_all(data_dir)?;
+    std::fs::create_dir_all(config_dir)?;
 
-    println!("Saving Anki deck...");
-    deck.write_to_file(deck_file)?;
+    Ok(())
+}
 
-    // TODO: Back up original file
-    println!("Updating {}...", input_file);
-    update_word_map(input_file, &word_map);
+async fn get_bin_csv(app_config: &AppConfig) -> Result<(), ProgramError> {
+    let mut tmp_file = tempfile()?;
 
-    println!("Done!");
+    println!("Downloading BIN data from URL {:?}...", &app_config.bin_csv_url);
+
+    let response = reqwest::get(&app_config.bin_csv_url).await?;
+    let content = response.bytes().await?;
+
+    tmp_file.write_all(content.as_ref())?;
+
+    println!("Extracting ZIP file to {:?}...", &app_config.bin_data);
+
+    let mut archive = zip::ZipArchive::new(tmp_file)?;
+    let mut file = archive.by_name(DEFAULT_BIN_CSV)?;
+    let mut outfile = File::create(&app_config.bin_data)?;
+    io::copy(&mut file, &mut outfile)?;
+
+    Ok(())
+}
+
+/// Ensure that the BIN CSV data file exists locally. If it does not exist,
+/// it will be downloaded and unzipped automatically.
+///
+/// # Arguments
+///
+/// * `config` - The application config.
+///
+async fn ensure_bin_data_exists(config: &AppConfig) -> Result<(), ProgramError> {
+    if config.bin_data.exists() {
+        return Ok(());
+    }
+
+    println!("===============================================================================");
+    println!("The required BIN data file {} does not exist. It can be downloaded", DEFAULT_BIN_CSV);
+    println!("automatically for you, or you may download it and unzip it yourself.");
+    println!();
+    println!("The compressed download is about 35 MB, and the uncompressed file uses about");
+    println!("325 MB of disk space.");
+    println!();
+    println!("This download only needs to occur once. The file will be saved as:");
+    println!("  {:?}", config.bin_data);
+    println!("===============================================================================");
+    println!();
+    print!("Continue with download? [y/N]: ");
+    std::io::stdout().flush()?;
+    let mut input = String::new();
+    let _ = std::io::stdin().read_line(&mut input)?;
+
+    if input.trim().to_ascii_lowercase().starts_with('y') {
+        get_bin_csv(&config).await?;
+        Ok(())
+    } else {
+        Err(ProgramError::BinData)
+    }
+}
+
+#[tokio::main]
+async fn main() -> Result<(), ProgramError> {
+    // Establish directories for holding state
+    match ProjectDirs::from("com", "loomcom", "is-anki-gen") {
+        Some(project_dirs) => {
+            let config = app_config(&project_dirs);
+
+            // If the word list doesn't exist, bail immediately.
+            if !config.wordlist.exists() {
+                println!("Word list file {:?} does not exist.", config.wordlist);
+                return Err(ProgramError::Configuration);
+            }
+
+            setup_project_dirs(&project_dirs)?;
+
+            if let Err(e) = ensure_bin_data_exists(&config).await {
+                match e {
+                    ProgramError::BinData => {
+                        println!("BIN file not downloaded or found locally.");
+                    }
+                    _ => {
+                        println!("Couldn't download BIN file: {:?}", e);
+                    }
+                }
+                println!("Good bye!");
+                return Err(e);
+            }
+
+            let mut dictionary = if config.dictionary.exists() {
+                Dictionary::load(File::open(&config.dictionary)?)?
+            } else {
+                Dictionary::new()
+            };
+
+            println!("Loading word list {:#?}...", config.wordlist);
+
+            let synced = dictionary.import_wordlist(File::open(&config.wordlist)?)?;
+
+            println!("Loaded {} words.", synced);
+
+            let updated = dictionary.update_definitions().await?;
+
+            if updated > 0 {
+                println!("Storing dictionary back to file... {:?}", &config.dictionary);
+                dictionary.store(&mut File::create(&config.dictionary)?)?;
+            }
+
+            println!("Loading BIN Data...");
+            let bin_data_file = File::open(&config.bin_data)?;
+            let bin_data = BinData::load(bin_data_file)?;
+
+            println!("Starting Anki deck generation...");
+            let deck = generate_deck(&dictionary, &bin_data, &config)?;
+
+            println!("Saving Anki deck...");
+            deck.write_to_file(&config.deck)?;
+
+            println!("Done!");
+        }
+        None => println!("Cannot access default application storage directory. Giving up."),
+    }
+
     Ok(())
 }
