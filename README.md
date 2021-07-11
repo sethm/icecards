@@ -10,7 +10,7 @@ moment.
 This program requires the raw *Sigrúnarsnið* format data from BÍN to
 work.  The data is available as a CSV file from the following page:
 
-https://bin.arnastofnun.is/gogn/mimisbrunnur/
+- https://bin.arnastofnun.is/gogn/mimisbrunnur/
 
 The program can automatically download and uncompress the correct file
 on initial run.
@@ -19,7 +19,7 @@ on initial run.
 
     USAGE:
         is-anki-gen [OPTIONS] <wordlist>
-
+    
     FLAGS:
         -h, --help       Prints help information
         -V, --version    Prints version information
@@ -27,22 +27,24 @@ on initial run.
     OPTIONS:
             --binurl <URL>    URL to fetch BÍN CSV [default:
                               https://bin.arnastofnun.is/django/api/nidurhal/?file=SHsnid.csv.zip]
-        -d, --deck <FILE>     Anki Deck output file [default: deck.apkg]
-            --deck-id <ID>    Optional numeric ID for the generated Anki deck
-
+            --deck <FILE>     Anki Deck output file [default: deck.apkg]
+    
     ARGS:
-        <wordlist>    List of words and categories, tab separated, one per line
+        <wordlist>    List of words, categories, and definitions (tab separated)
 
-The optional argument `--deck-id` can be used to set the Anki ID on 
-the generated deck. If not supplied, a random ID based on the current
-timestamp will be used.
+The input should be a list of root words, their category, and their
+definition, tab-separated. For example:
 
-Anki uses these IDs in its internal database to keep track of what
-decks contain what cards, so they really do have to be unique. Setting
-IDs for your own decks rather than using random IDs is the preferred
-way, because you can regenerate decks at any time after adding more
-words to the word list, and only the new words will be imported into
-Anki on the next import.
+    birta    noun        light, brightness
+    dagblað  noun        daily newspaper
+    ungur    adjective   young
+    vinsæll  adjective   popular
+    læra     verb        to learn, study
+    tala     verb        to talk, speak
+
+The categories *noun*, *adjective*, and *verb* are currently supported.
+
+An example input file can be found in the **sample-data** directory.
 
 # Links
 

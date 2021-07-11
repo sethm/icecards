@@ -112,13 +112,9 @@ pub enum ProgramError {
     Anki(#[from] genanki_rs::Error),
 }
 
-fn generate_deck(
-    dictionary: &Dictionary,
-    bin_data: &BinData,
-    config: &AppConfig,
-) -> Result<Deck, ProgramError> {
+fn generate_deck(dictionary: &Dictionary, bin_data: &BinData) -> Result<Deck, ProgramError> {
     let mut deck =
-        Deck::new(config.deck_id, "Icelandic Vocabulary", "Deck for studying Icelandic Vocabulary");
+        Deck::new(DECK_ID, "Icelandic Vocabulary", "Deck for studying Icelandic Vocabulary");
 
     let adjective_model = Model::new_with_options(
         ADJECTIVE_MODEL_ID,
@@ -302,28 +298,19 @@ fn app_config(project_dirs: &ProjectDirs) -> AppConfig {
         .arg(
             Arg::with_name("deck")
                 .help("Anki Deck output file")
-                .short("d")
                 .long("deck")
                 .value_name("FILE")
-                .default_value("deck.apkg")
-                .takes_value(true),
-        )
-        .arg(
-            Arg::with_name("deck-id")
-                .help("Optional numeric ID for the generated Anki deck")
-                .long("deck-id")
-                .value_name("ID")
                 .takes_value(true)
+                .default_value("deck.apkg")
                 .required(false),
         )
         .arg(
             Arg::with_name("wordlist")
-                .help("List of words and categories, tab separated, one per line")
+                .help("List of words, categories, and definitions (tab separated)")
                 .required(true),
         )
         .get_matches();
 
-    let dictionary = project_dirs.data_dir().join("dictionary.json");
     let bin_data: PathBuf = project_dirs.data_dir().join(DEFAULT_BIN_CSV);
 
     let bin_csv_url = match arg_matches.value_of("binurl") {
@@ -341,22 +328,15 @@ fn app_config(project_dirs: &ProjectDirs) -> AppConfig {
         None => Path::new("wordlist.txt").to_path_buf(),
     };
 
-    let deck_id = match arg_matches.value_of("deck-id") {
-        Some(id) => id.parse::<usize>().unwrap(),
-        None => DECK_ID,
-    };
-
-    AppConfig { bin_csv_url, bin_data, dictionary, deck, wordlist, deck_id }
+    AppConfig { bin_csv_url, bin_data, deck, wordlist }
 }
 
 #[derive(Debug)]
 struct AppConfig {
     bin_csv_url: String,
     bin_data: PathBuf,
-    dictionary: PathBuf,
     deck: String,
     wordlist: PathBuf,
-    deck_id: usize,
 }
 
 fn setup_project_dirs(project_dirs: &ProjectDirs) -> Result<(), ProgramError> {
@@ -459,7 +439,7 @@ async fn main() -> Result<(), ProgramError> {
             let bin_data = BinData::load(bin_data_file)?;
 
             println!("Starting Anki deck generation...");
-            let deck = generate_deck(&dictionary, &bin_data, &config)?;
+            let deck = generate_deck(&dictionary, &bin_data)?;
 
             println!("Saving Anki deck...");
             deck.write_to_file(&config.deck)?;
