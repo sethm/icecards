@@ -1,12 +1,8 @@
-use std::borrow::Borrow;
-use std::time::{SystemTime, SystemTimeError};
-
 use crate::bindata::{BinData, Gender};
-use crate::dictionary::{Category, Dictionary, DictionaryEntry};
+use crate::dictionary::{Category, Dictionary};
 use clap::{App, Arg};
 use directories_next::ProjectDirs;
 use genanki_rs::{Deck, Field, Model, Note, Template};
-use rand::prelude::*;
 use std::fs::File;
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
@@ -21,7 +17,9 @@ const DEFAULT_BIN_CSV: &str = "SHsnid.csv";
 const DEFAULT_DECK: &str = "deck.apkg";
 const BIN_CSV_URL: &str = "https://bin.arnastofnun.is/django/api/nidurhal/?file=SHsnid.csv.zip";
 const NOUN_MODEL_ID: usize = 1625673414000;
-const ADJECTIVE_MODEL_ID: usize = 1625673415000;
+const ADJECTIVE_MODEL_ID: usize = 1625673414010;
+const VERB_MODEL_ID: usize = 1625673414020;
+const DECK_ID: usize = 1625673414030;
 
 const CSS: &str = "\
 .card {\
@@ -42,6 +40,13 @@ td {\
   padding: 6px;\
 }";
 
+const NOUN_TMPL: &str = r#"{{FrontSide}}
+<hr id="gender"/>
+<h2>{{Gender}}</h2>
+<hr id="forms"/>
+<h2><em>g. sg.</em> {{Genitive Singular}}, <em>n. pl.</em> {{Nominative Plural}}</h2>
+<p>{{Definition}}</p>"#;
+
 const ADJ_TMPL: &str = r#"{{FrontSide}}
 <hr id="forms">
 <table>
@@ -49,10 +54,39 @@ const ADJ_TMPL: &str = r#"{{FrontSide}}
   <th></th><th>m.</th><th>f.</th><th>n.</th>
  </tr>
  <tr>
-  <th>Sg.</th><td>{{MascSg}}</td><td>{{FemSg}}</td><td>{{NeutSg}}</td>
+  <th>Sg.</th><td>{{Masculine Singular}}</td><td>{{Feminine Singular}}</td><td>{{Neuter Singular}}</td>
  </tr>
  <tr>
-  <th>Pl.</th><td>{{MascPl}}</td><td>{{FemPl}}</td><td>{{NeutPl}}</td>
+  <th>Pl.</th><td>{{Masculine Plural}}</td><td>{{Feminine Plural}}</td><td>{{Neuter Plural}}</td>
+ </tr>
+</table>
+<hr id="definition">
+<p>{{Definition}}</p>"#;
+
+const VERB_TMPL: &str = r#"{{FrontSide}}
+<hr id="pres">
+<h3>Present Indicative</h3>
+<table>
+ <tr>
+  <td>ég {{Present 1st Singular}}</td><td>við {{Present 1st Plural}}</td>
+ </tr>
+ <tr>
+  <td>þú {{Present 2nd Singular}}</td><td>þið {{Present 2nd Plural}}</td>
+ </tr>
+ <tr>
+  <td>hann/hún/það {{Present 3rd Singular}}</td><td>þeir/þær/þau {{Present 3rd Plural}}</td>
+ </tr>
+</table>
+<h3>Past Indicative</h3>
+<table>
+ <tr>
+  <td>ég {{Past 1st Singular}}</td><td>við {{Past 1st Plural}}</td>
+ </tr>
+ <tr>
+  <td>þú {{Past 2nd Singular}}</td><td>þið {{Past 2nd Plural}}</td>
+ </tr>
+ <tr>
+  <td>hann/hún/það {{Past 3rd Singular}}</td><td>þeir/þær/þau {{Past 3rd Plural}}</td>
  </tr>
 </table>
 <hr id="definition">
@@ -72,21 +106,10 @@ pub enum ProgramError {
     Zip(#[from] ZipError),
     #[error("bin data file does not exist")]
     BinData,
-    #[error("system time")]
-    SystemTime(#[from] SystemTimeError),
     #[error("CSV parse failed")]
     Csv(#[from] csv::Error),
-    #[error("Serialization")]
-    Serialization(#[from] serde_json::Error),
     #[error("Anki Generation")]
     Anki(#[from] genanki_rs::Error),
-}
-
-/// Return a somewhat, kind-of, more-or-less random ID for an Anki record.
-fn random_id() -> Result<usize, ProgramError> {
-    let mut rng = thread_rng();
-    let delta: usize = rng.gen_range(0..100);
-    Ok(SystemTime::now().duration_since(SystemTime::UNIX_EPOCH)?.as_millis() as usize + delta)
 }
 
 fn generate_deck(
@@ -99,17 +122,19 @@ fn generate_deck(
 
     let adjective_model = Model::new_with_options(
         ADJECTIVE_MODEL_ID,
-        "Icelandic Adjectives",
+        "Icelandic Adjective",
         vec![
-            Field::new("MascSg"),
-            Field::new("FemSg"),
-            Field::new("NeutSg"),
-            Field::new("MascPl"),
-            Field::new("FemPl"),
-            Field::new("NeutPl"),
+            Field::new("Masculine Singular"),
+            Field::new("Feminine Singular"),
+            Field::new("Neuter Singular"),
+            Field::new("Masculine Plural"),
+            Field::new("Feminine Plural"),
+            Field::new("Neuter Plural"),
             Field::new("Definition"),
         ],
-        vec![Template::new("Card 1").qfmt("<h1>{{MascSg}}</h1>").afmt(ADJ_TMPL)],
+        vec![Template::new("Icelandic Adjective")
+            .qfmt("<h1>{{Masculine Singular}}</h1>")
+            .afmt(ADJ_TMPL)],
         Some(CSS),
         None,
         None,
@@ -119,17 +144,17 @@ fn generate_deck(
 
     let noun_model = Model::new_with_options(
         NOUN_MODEL_ID,
-        "Noun Plurals",
+        "Icelandic Noun",
         vec![
-            Field::new("NomSg"),
-            Field::new("GenSg"),
-            Field::new("NomPl"),
+            Field::new("Nominative Singular"),
+            Field::new("Genitive Singular"),
+            Field::new("Nominative Plural"),
             Field::new("Gender"),
             Field::new("Definition"),
         ],
-        vec![Template::new("Card 1")
-            .qfmt("<h1>{{NomSg}}</h1>")
-            .afmt(r#"{{FrontSide}}<hr id="gender"/><h2>{{Gender}}</h2><hr id="forms"/><h2><em>g. sg.</em> {{GenSg}}, <em>n. pl.</em> {{NomPl}}</h2> <p>{{Definition}}</p>"#)],
+        vec![Template::new("Icelandic Noun")
+            .qfmt("<h1>{{Nominative Singular}}</h1>")
+            .afmt(NOUN_TMPL)],
         Some(CSS),
         None,
         None,
@@ -137,16 +162,48 @@ fn generate_deck(
         None,
     );
 
-    for (root, dictionary_entry) in &dictionary.entries {
-        match dictionary_entry.category {
+    let verb_model = Model::new_with_options(
+        VERB_MODEL_ID,
+        "Icelandic Verb",
+        vec![
+            Field::new("Infinitive"),
+            Field::new("Present 1st Singular"),
+            Field::new("Present 2nd Singular"),
+            Field::new("Present 3rd Singular"),
+            Field::new("Present 1st Plural"),
+            Field::new("Present 2nd Plural"),
+            Field::new("Present 3rd Plural"),
+            Field::new("Past 1st Singular"),
+            Field::new("Past 2nd Singular"),
+            Field::new("Past 3rd Singular"),
+            Field::new("Past 1st Plural"),
+            Field::new("Past 2nd Plural"),
+            Field::new("Past 3rd Plural"),
+            Field::new("Definition"),
+        ],
+        vec![Template::new("Icelandic Verb").qfmt("<h1>að {{Infinitive}}</h1>").afmt(VERB_TMPL)],
+        Some(CSS),
+        None,
+        None,
+        None,
+        None,
+    );
+
+    for (key, definition) in &dictionary.entries {
+        let root = &key.root;
+        match key.category {
             Category::Noun => {
-                if let Some(note) = noun(&root, bin_data, &dictionary_entry, &noun_model) {
+                if let Some(note) = noun(&root, bin_data, definition, &noun_model) {
                     deck.add_note(note)
                 }
             }
             Category::Adjective => {
-                if let Some(note) = adjective(&root, bin_data, &dictionary_entry, &adjective_model)
-                {
+                if let Some(note) = adjective(&root, bin_data, definition, &adjective_model) {
+                    deck.add_note(note)
+                }
+            }
+            Category::Verb => {
+                if let Some(note) = verb(&root, bin_data, definition, &verb_model) {
                     deck.add_note(note)
                 }
             }
@@ -156,24 +213,19 @@ fn generate_deck(
     Ok(deck)
 }
 
-fn adjective(
-    root: &str,
-    bin_data: &BinData,
-    dictionary_entry: &DictionaryEntry,
-    model: &Model,
-) -> Option<Note> {
+fn adjective(root: &str, bin_data: &BinData, definition: &str, model: &Model) -> Option<Note> {
     match bin_data.adjective(root) {
         Some(adjective_entry) => Some(
             Note::new(
                 model.clone(),
                 vec![
-                    adjective_entry.masc_nom_sg_strong.unwrap_or("—".to_string()).borrow(),
-                    adjective_entry.fem_nom_sg_strong.unwrap_or("—".to_string()).borrow(),
-                    adjective_entry.neut_nom_sg_strong.unwrap_or("—".to_string()).borrow(),
-                    adjective_entry.masc_nom_pl_strong.unwrap_or("—".to_string()).borrow(),
-                    adjective_entry.fem_nom_pl_strong.unwrap_or("—".to_string()).borrow(),
-                    adjective_entry.neut_nom_pl_strong.unwrap_or("—".to_string()).borrow(),
-                    &dictionary_entry.definition(),
+                    &adjective_entry.masc_nom_sg_strong.unwrap_or_else(|| "—".to_string()),
+                    &adjective_entry.fem_nom_sg_strong.unwrap_or_else(|| "—".to_string()),
+                    &adjective_entry.neut_nom_sg_strong.unwrap_or_else(|| "—".to_string()),
+                    &adjective_entry.masc_nom_pl_strong.unwrap_or_else(|| "—".to_string()),
+                    &adjective_entry.fem_nom_pl_strong.unwrap_or_else(|| "—".to_string()),
+                    &adjective_entry.neut_nom_pl_strong.unwrap_or_else(|| "—".to_string()),
+                    definition,
                 ],
             )
             .unwrap(),
@@ -182,26 +234,49 @@ fn adjective(
     }
 }
 
-fn noun(
-    root: &str,
-    bin_data: &BinData,
-    dictionary_entry: &DictionaryEntry,
-    model: &Model,
-) -> Option<Note> {
+fn noun(root: &str, bin_data: &BinData, definition: &str, model: &Model) -> Option<Note> {
     match bin_data.noun(root) {
         Some(noun_entry) => Some(
             Note::new(
                 model.clone(),
                 vec![
                     root,
-                    noun_entry.gen_sg.unwrap_or("—".to_string()).borrow(),
-                    noun_entry.nom_pl.unwrap_or("—".to_string()).borrow(),
+                    &noun_entry.gen_sg.unwrap_or_else(|| "—".to_string()),
+                    &noun_entry.nom_pl.unwrap_or_else(|| "—".to_string()),
                     match noun_entry.gender {
                         Gender::Masculine => "Masculine",
                         Gender::Feminine => "Feminine",
                         Gender::Neuter => "Neuter",
                     },
-                    &dictionary_entry.definition(),
+                    definition,
+                ],
+            )
+            .unwrap(),
+        ),
+        _ => None,
+    }
+}
+
+fn verb(root: &str, bin_data: &BinData, definition: &str, model: &Model) -> Option<Note> {
+    match bin_data.verb(root) {
+        Some(verb_entry) => Some(
+            Note::new(
+                model.clone(),
+                vec![
+                    root,
+                    &verb_entry.pres_ind_first_sg.unwrap_or_else(|| "—".to_string()),
+                    &verb_entry.pres_ind_second_sg.unwrap_or_else(|| "—".to_string()),
+                    &verb_entry.pres_ind_third_sg.unwrap_or_else(|| "—".to_string()),
+                    &verb_entry.pres_ind_first_pl.unwrap_or_else(|| "—".to_string()),
+                    &verb_entry.pres_ind_second_pl.unwrap_or_else(|| "—".to_string()),
+                    &verb_entry.pres_ind_third_pl.unwrap_or_else(|| "—".to_string()),
+                    &verb_entry.past_ind_first_sg.unwrap_or_else(|| "—".to_string()),
+                    &verb_entry.past_ind_second_sg.unwrap_or_else(|| "—".to_string()),
+                    &verb_entry.past_ind_third_sg.unwrap_or_else(|| "—".to_string()),
+                    &verb_entry.past_ind_first_pl.unwrap_or_else(|| "—".to_string()),
+                    &verb_entry.past_ind_second_pl.unwrap_or_else(|| "—".to_string()),
+                    &verb_entry.past_ind_third_pl.unwrap_or_else(|| "—".to_string()),
+                    definition,
                 ],
             )
             .unwrap(),
@@ -268,7 +343,7 @@ fn app_config(project_dirs: &ProjectDirs) -> AppConfig {
 
     let deck_id = match arg_matches.value_of("deck-id") {
         Some(id) => id.parse::<usize>().unwrap(),
-        None => random_id().unwrap(),
+        None => DECK_ID,
     };
 
     AppConfig { bin_csv_url, bin_data, dictionary, deck, wordlist, deck_id }
@@ -377,24 +452,7 @@ async fn main() -> Result<(), ProgramError> {
                 return Err(e);
             }
 
-            let mut dictionary = if config.dictionary.exists() {
-                Dictionary::load(File::open(&config.dictionary)?)?
-            } else {
-                Dictionary::new()
-            };
-
-            println!("Loading word list {:#?}...", config.wordlist);
-
-            let synced = dictionary.import_wordlist(File::open(&config.wordlist)?)?;
-
-            println!("Loaded {} words.", synced);
-
-            let updated = dictionary.update_definitions().await?;
-
-            if updated > 0 {
-                println!("Storing dictionary back to file... {:?}", &config.dictionary);
-                dictionary.store(&mut File::create(&config.dictionary)?)?;
-            }
+            let dictionary = Dictionary::load(File::open(&config.wordlist)?)?;
 
             println!("Loading BIN Data...");
             let bin_data_file = File::open(&config.bin_data)?;

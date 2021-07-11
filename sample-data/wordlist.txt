@@ -1,234 +1,239 @@
-afmælisveisla	noun
-anddyri	noun
-aðalhlutverk	noun
-belti	noun
-birta	noun
-blaðagrein	noun
-borg	noun
-borð	noun
-bróðir	noun
-bíll	noun
-bíó	noun
-bíómynd	noun
-bók	noun
-bókmenntafræði	noun
-dagblað	noun
-dagur	noun
-dalur	noun
-diskur	noun
-dót	noun
-eignarfall	noun
-fangelsi	noun
-farangur	noun
-ferð	noun
-fjall	noun
-forrit	noun
-forritari	noun
-framtíð	noun
-frelsishetja	noun
-gaman	noun
-gangstétt	noun
-gata	noun
-geisladiskur	noun
-grein	noun
-greiða	noun
-gönguferð	noun
-handklæði	noun
-handrit	noun
-hangikjöt	noun
-haust	noun
-herbergi	noun
-hestur	noun
-hlutur	noun
-hlutverk	noun
-hreinleiki	noun
-hálstafla	noun
-hár	noun
-hárþurrka	noun
-hörkuvinna	noun
-hús	noun
-innsetning	noun
-kennari	noun
-kongur	noun
-kort	noun
-króna	noun
-kvikmynd	noun
-kvöldmatur	noun
-kyrrð	noun
-kóramót	noun
-leikstjóri	noun
-leiðsögumaður	noun
-listamaður	noun
-listasafn	noun
-listaverk	noun
-listfræðingur	noun
-litur	noun
-líf	noun
-lýsingarorð	noun
-mappa	noun
-matur	noun
-maður	noun
-meistari	noun
-mikill	noun
-miðbær	noun
-miði	noun
-mynd	noun
-málverk	noun
-mót	noun
-nafnorð	noun
-nammi	noun
-nefnifall	noun
-nemandi	noun
-nóta	noun
-ostur	noun
-persóna	noun
-peysa	noun
-piltur	noun
-popp	noun
-pottur	noun
-rós	noun
-rúm	noun
-rúta	noun
-safn	noun
-sagnorð	noun
-samband	noun
-samloka	noun
-samúð	noun
-sjampó	noun
-skinka	noun
-skógur	noun
-skór	noun
-sonur	noun
-spjall	noun
-steinn	noun
-stelpa	noun
-stjórnandi	noun
-stjórnmálamaður	noun
-strákur	noun
-stytta	noun
-stærðfræði	noun
-stóll	noun
-sumar	noun
-sundbolur	noun
-sundföt	noun
-sundgleraugu	noun
-sundskýla	noun
-svefnpoki	noun
-svæði	noun
-systkini	noun
-sápa	noun
-sími	noun
-sólarolía	noun
-sólbekkur	noun
-söguþráður	noun
-söngkona	noun
-söngvari	noun
-súpa	noun
-taska	noun
-torg	noun
-tækifæri	noun
-tónlist	noun
-tónlistarmaður	noun
-tölva	noun
-tölvupóstur	noun
-undantekning	noun
-upplýsing	noun
-uppáhald	noun
-vatn	noun
-vefsíða	noun
-veitingahús	noun
-veitingastaður	noun
-verkefni	noun
-verðlaun	noun
-vetur	noun
-vina	noun
-vinur	noun
-vor	noun
-vél	noun
-á	noun
-áhorfandi	noun
-æfing	noun
-öld	noun
-þjóðlistasafn	noun
-þjóðminjasafn	noun
-þolfall	noun
-þágufall	noun
-alþjóðlegur	adjective
-appelsínugulur	adjective
-auðveldur	adjective
-bjartur	adjective
-bleikur	adjective
-blár	adjective
-brúnn	adjective
-dapur	adjective
-dimmur	adjective
-duglegur	adjective
-erfiður	adjective
-fallegur	adjective
-fjólublár	adjective
-fjölbreyttur	adjective
-flestur	adjective
-frekur	adjective
-frábær	adjective
-frægur	adjective
-fróður	adjective
-fyndinn	adjective
-félagslyndur	adjective
-gamall	adjective
-glaður	adjective
-glæsilegur	adjective
-grár	adjective
-grænn	adjective
-gulur	adjective
-gáfaður	adjective
-hamingjusamur	adjective
-heimsfrægur	adjective
-heimskur	adjective
-heitur	adjective
-hlýr	adjective
-hreinn	adjective
-hress	adjective
-hvítur	adjective
-hæfileikaríkur	adjective
-hægur	adjective
-kaldur	adjective
-kveðinn	adjective
-kvíðinn	adjective
-kátur	adjective
-latur	adjective
-leiðinlegur	adjective
-ljótur	adjective
-léttur	adjective
-lítill	adjective
-margur	adjective
-nógur	adjective
-nýlegur	adjective
-nýr	adjective
-rauður	adjective
-rólegur	adjective
-saddur	adjective
-skemmtilegur	adjective
-skýr	adjective
-sorglegur	adjective
-spennandi	adjective
-spenntur	adjective
-stórkostlegur	adjective
-svangur	adjective
-svartur	adjective
-svolítill	adjective
-sérstakur	adjective
-tilbúinn	adjective
-ungur	adjective
-vinsæll	adjective
-vondur	adjective
-yndislegur	adjective
-áhugasamur	adjective
-ánægjulegur	adjective
-ótrúlegur	adjective
-óvinsæll	adjective
-óþekktur	adjective
-örugglega	adjective
-þreyttur	adjective
-þröngur	adjective
-þunglyndur	adjective
-þyrstur	adjective
+afmælisveisla	noun	birthday party
+anddyri	noun	entrance, vestibule
+aðalhlutverk	noun	main role (acting)
+belti	noun	1. belt; 2. zone; 3. caterpillar tread
+birta	noun	light, brightness
+blaðagrein	noun	newspaper article
+borg	noun	1. city, town; 2. castle; 3. rocky hill; 4. shelter
+borð	noun	1. table; 2. plank, board
+bróðir	noun	brother
+bíll	noun	car, auto
+bíó	noun	movie theater, cinema
+bíómynd	noun	film
+bók	noun	book
+bókmenntafræði	noun	literary studies, literature
+dagblað	noun	daily newspaper
+dagur	noun	day
+dalur	noun	1. valley, dale; 2. dollar
+diskur	noun	1. plate; 2. disk/disc
+dót	noun	1. luggage, things; 2. toys; 3. rabble
+eignarfall	noun	genitive, possessive case
+fangelsi	noun	prison
+farangur	noun	luggage, baggage
+ferð	noun	1. trip, journey; 2. speed
+fjall	noun	mountain
+forrit	noun	1. computer program; 2. examplar
+forritari	noun	computer programmer
+framtíð	noun	1. future; 2. future tense
+frelsishetja	noun	freedom champion
+gaman	noun	fun, enjoyment
+gangstétt	noun	sidewalk
+gata	noun	street, way, path
+geisladiskur	noun	compact disc, CD
+grein	noun	1. branch, bough; 2. subject, field; 3. article; 4. paragraph; 5. point
+greiða	noun	comb
+gönguferð	noun	walk, hike
+handklæði	noun	towel
+handrit	noun	manuscript
+hangikjöt	noun	smoked meat (esp. lamb)	
+haust	noun	fall, autumn
+herbergi	noun	room
+hestur	noun	horse
+hlutur	noun	1. thing, object; 2. part, share
+hlutverk	noun	1. task; 2. mission, role
+hreinleiki	noun	purity
+hálstafla	noun	lozenge
+hár	noun	hair
+hárþurrka	noun	hair dryer
+hörkuvinna	noun	(extremely) hard work
+hús	noun	house, home
+innsetning	noun	installation (as a work of art)
+kennari	noun	teacher
+kongur	noun	king
+kort	noun	1. map; 2. postcard, card
+króna	noun	1. Icelandic currency; 2. tree-top, crown of a tree
+kvikmynd	noun	film, movie
+kvöldmatur	noun	supper, dinner
+kyrrð	noun	1. silence, stillness; 2. peace and quiet
+kóramót	noun	choir meet
+leikstjóri	noun	director (of a film, play)
+leiðsögumaður	noun	guide, travel guide
+listamaður	noun	artist
+listasafn	noun	art museum
+listaverk	noun	work of art
+listfræðingur	noun	art historian
+litur	noun	1. color; 2. dye, coloring; 3. crayon; 4. suit (in cards)
+líf	noun	life
+lýsingarorð	noun	adjective
+mappa	noun	folder, file
+matur	noun	food
+maður	noun	1. person, human, individual; 2. man; 3. husband; 4. piece (in chess); 5. one, you
+meistari	noun	master, maestro (in music)
+mikill	noun	1. large, big; 2. much; 3. great
+miðbær	noun	city center, downtown area
+miði	noun	1. slip of paper, note; 2. ticket
+mynd	noun	1. shape, form; 2. photo, picture; 3. movie, film; 4. painting, picture; 5. image
+málverk	noun	painting
+mót	noun	1. meeting, gathering; 2. tournament, meet; 3. mould, form; 4. (pl.) joint
+nafnorð	noun	noun, substantive
+nammi	noun	candy, sweets
+nefnifall	noun	nominative case
+nemandi	noun	student, pupil
+nóta	noun	1. (music) note; 2. bill; 3. receipt; 4. comment, note
+ostur	noun	cheese
+persóna	noun	1. person; 2. personality; 3. character
+peysa	noun	1. sweater, jersey; 2. blouse
+piltur	noun	boy, young man
+popp	noun	1. pop music; 2. popcorn
+pottur	noun	1. pot; 2. liter; 3. chamber pot; 4. pot, pool (of money); 5. (heitur pottur) hot pool
+rós	noun	rose
+rúm	noun	1. bed; 2. area, space
+rúta	noun	1. coach, bus; 2. route
+safn	noun	1. collection; 2. museum; 3. flock of sheep
+sagnorð	noun	verb
+samband	noun	1. connection, contact; 2. relationship; 3. union, federation
+samloka	noun	1. sandwich; 2. shellfish
+samúð	noun	sympathy, compassion
+sjampó	noun	shampoo
+skinka	noun	ham, smoked pork
+skógur	noun	forest, woods
+skór	noun	shoe
+sonur	noun	son
+spjall	noun	conversation, chat
+steinn	noun	stone
+stelpa	noun	girl
+stjórnandi	noun	1. leader; 2. conductor; 3. (pl.) directors, the management
+stjórnmálamaður	noun	politician
+strákur	noun	boy
+stytta	noun	statue
+stærðfræði	noun	math, mathematics
+stóll	noun	chair
+sumar	noun	summer
+sundbolur	noun	swimsuit
+sundföt	noun	bathing suit
+sundgleraugu	noun	swimming goggles
+sundskýla	noun	swimming trunks
+svefnpoki	noun	sleeping bag
+svæði	noun	area, zone
+systkini	noun	siblings
+sápa	noun	soap
+sími	noun	telephone
+sólarolía	noun	sunscreen, suntan lotion
+sólbekkur	noun	1. sun chair; 2. window sill
+söguþráður	noun	plot
+söngkona	noun	singer (female)
+söngvari	noun	singer
+súpa	noun	soup
+taska	noun	1. suitcase; 2. bag, handbag
+torg	noun	(city) square
+tækifæri	noun	opportunity
+tónlist	noun	music
+tónlistarmaður	noun	1. musician; 2. composer
+tölva	noun	computer
+tölvupóstur	noun	e-mail
+undantekning	noun	exception
+upplýsing	noun	1. (pl.) information; 2. Enlightenment; 3. illumination, lighting
+uppáhald	noun	pet, favorite
+vatn	noun	1. water; 2. lake
+vefsíða	noun	web page
+veitingahús	noun	restaurant
+veitingastaður	noun	restaurant
+verkefni	noun	task, assignment, project
+verðlaun	noun	1. prize, award; 2. reward
+vetur	noun	winter
+vina	noun	girl friend
+vinur	noun	friend
+vor	noun	spring
+vél	noun	1. motor, engine; 2. machine
+á	noun	river, stream
+áhorfandi	noun	spectator, onlooker
+æfing	noun	1. training, practice; 2. exercise, drill; 3. rehearsal
+öld	noun	1. age; 2. century
+þjóðlistasafn	noun	national gallery
+þjóðminjasafn	noun	national museum
+þolfall	noun	accusative case
+þágufall	noun	dative case
+alþjóðlegur	adjective	international
+appelsínugulur	adjective	orange (color)
+auðveldur	adjective	easy, simple
+bjartur	adjective	bright, clear, shining
+bleikur	adjective	pink, pale
+blár	adjective	1. blue; 2. unadulterated, pure
+brúnn	adjective	brown
+dapur	adjective	1. sad, depressed; 2. poor, inadequate
+dimmur	adjective	1. dark; 2. deep; 3. grave
+duglegur	adjective	energetic, hard-working, efficient
+erfiður	adjective	1. difficult, hard; 2. wearying, fatiguing; 3. troublesome
+fallegur	adjective	beautiful
+fjólublár	adjective	violet (color)
+fjölbreyttur	adjective	varied, many-sided
+frekur	adjective	pushy, forward, fresh
+frábær	adjective	distinguished, excellent
+frægur	adjective	famous
+fróður	adjective	knowledgeable, learned, erudite, well-read
+fyndinn	adjective	witty, funny
+félagslyndur	adjective	sociable, gregarious
+gamall	adjective	old, ancient
+glaður	adjective	1. glad, happy, cheerful; 2. bright
+glæsilegur	adjective	splendid, magnificent, elegant
+grár	adjective	grey
+grænn	adjective	green
+gulur	adjective	yellow
+gáfaður	adjective	intelligent
+hamingjusamur	adjective	happy
+heimsfrægur	adjective	world-famous
+heimskur	adjective	stupid
+heitur	adjective	hot, warm
+hlýr	adjective	warm
+hreinn	adjective	1. clean; 2. pure; 3. plain
+hress	adjective	1. fit, well; 2. in high spirits, in good form
+hvítur	adjective	white
+hæfileikaríkur	adjective	talented
+hægur	adjective	1. easy, convenient; 2. possible; 3. calm, quiet, slow
+kaldur	adjective	cold
+kvíðinn	adjective	fearful, anxious, apprehensive
+kátur	adjective	cheerful, merry, jolly
+latur	adjective	lazy
+leiðinlegur	adjective	1. dull, boring, tedious; 2. sad
+ljótur	adjective	1. ugly; 2. bad
+léttur	adjective	1. light; 2. easy, light; 3. light, nimble; 4. cheerful, merry
+lítill	adjective	1. small, short; 2. little, insignificant
+margur	adjective	1. many, a lot; 2. much, many things
+nógur	adjective	enough, sufficient, satisfactory
+nýlegur	adjective	almost new, recent
+nýr	adjective	new, fresh
+rauður	adjective	red
+rólegur	adjective	1. calm, quiet, tranquil; 2. slow
+saddur	adjective	full, replete
+skemmtilegur	adjective	1. amusing, funny; 2. entertaining; 3. interesting
+skýr	adjective	1. clear, distinct; 2. lucid, readily-intelligible; 3. sharp, quick, intelligent
+sorglegur	adjective	1. tragic, sad; 2. sad, distressed
+spennandi	adjective	thrilling, exciting
+spenntur	adjective	1. expectant, eager, anxious; 2. tense, nervous, keyed up
+stórkostlegur	adjective	great, magnificent, splendid
+svangur	adjective	hungry
+svartur	adjective	black
+svolítill	adjective	1. small, little; 2. a little
+sérstakur	adjective	1. separate; 2. particular; 3. special, unusual
+tilbúinn	adjective	1. ready; 2. prepared
+ungur	adjective	young
+vinsæll	adjective	popular
+vondur	adjective	1. bad, evil; 2. angry, mad; 3. poor, bad, in bad shape
+yndislegur	adjective	wonderful, marvellous
+áhugasamur	adjective	interested, keen
+ánægjulegur	adjective	enjoyable, pleasant, delightful
+ótrúlegur	adjective	unbelievable
+óvinsæll	adjective	unpopular, disliked
+óþekktur	adjective	unknown
+örugglega	adjective	1. certainly, definitely; 2. with assurance, securely
+þreyttur	adjective	tired, exhausted, fatigued
+þröngur	adjective	1. crowded; 2. narrow; 3. difficult
+þunglyndur	adjective	sad, melancholy, depressed
+þyrstur	adjective	thirsty
+fara	verb	1. to leave, go; 2. to move, travel; 3. to begin, commence
+læra	verb	learn, study
+skoða	verb	1. to observe, take a look at; 2. to examine, study, scrutinize; 3. to consider, study
+borða	verb	1. eat; 2. dine
+tala	verb	talk, speak
+taka	verb	1. to take; 2. to seize, capture; 3. to get, obtain; 4. to understand; 5. to accept
+nema	verb	1. to study, learn; 2. to perceive

@@ -12,11 +12,43 @@ pub struct BinEntry {
     pub tag: String,
 }
 
+impl BinEntry {
+    fn is_adjective(&self) -> bool {
+        self.word_class == "lo"
+    }
+
+    fn is_noun(&self) -> bool {
+        self.word_class == "kk" || self.word_class == "kvk" || self.word_class == "hk"
+    }
+
+    fn is_verb(&self) -> bool {
+        self.word_class == "so"
+    }
+}
+
 #[derive(Debug, Eq, PartialEq)]
 pub enum Gender {
     Masculine,
     Feminine,
     Neuter,
+}
+
+#[derive(Debug, Eq, PartialEq)]
+pub struct VerbEntry {
+    pub pres_ind_first_sg: Option<String>,
+    pub pres_ind_second_sg: Option<String>,
+    pub pres_ind_third_sg: Option<String>,
+    pub pres_ind_first_pl: Option<String>,
+    pub pres_ind_second_pl: Option<String>,
+    pub pres_ind_third_pl: Option<String>,
+    pub past_ind_first_sg: Option<String>,
+    pub past_ind_second_sg: Option<String>,
+    pub past_ind_third_sg: Option<String>,
+    pub past_ind_first_pl: Option<String>,
+    pub past_ind_second_pl: Option<String>,
+    pub past_ind_third_pl: Option<String>,
+    // Many more fields could go here. Icelandic conjugations are huge.
+    // TODO: Subjunctive mood, mediopassive voice, Past Participle, Imperative, etc.
 }
 
 #[derive(Debug, Eq, PartialEq)]
@@ -129,7 +161,7 @@ impl BinData {
         match entries {
             Some(entries) => {
                 let entries =
-                    entries.iter().filter(|&e| is_adjective(e)).collect::<Vec<&BinEntry>>();
+                    entries.iter().filter(|&e| e.is_adjective()).collect::<Vec<&BinEntry>>();
 
                 if entries.is_empty() {
                     None
@@ -339,7 +371,7 @@ impl BinData {
 
         match entries {
             Some(entries) => {
-                let entries = entries.iter().filter(|&f| is_noun(f)).collect::<Vec<&BinEntry>>();
+                let entries = entries.iter().filter(|&e| e.is_noun()).collect::<Vec<&BinEntry>>();
 
                 if entries.is_empty() {
                     None
@@ -421,14 +453,73 @@ impl BinData {
             None => None,
         }
     }
-}
 
-fn is_adjective(entry: &BinEntry) -> bool {
-    entry.word_class == "lo"
-}
+    pub fn verb(&self, root: &str) -> Option<VerbEntry> {
+        let entries = self.data.get(root);
 
-fn is_noun(entry: &BinEntry) -> bool {
-    entry.word_class == "kk" || entry.word_class == "kvk" || entry.word_class == "hk"
+        match entries {
+            Some(entries) => {
+                let entries = entries.iter().filter(|&e| e.is_verb()).collect::<Vec<&BinEntry>>();
+
+                if entries.is_empty() {
+                    None
+                } else {
+                    Some(VerbEntry {
+                        pres_ind_first_sg: entries
+                            .iter()
+                            .find(|&&e| e.tag == "GM-FH-NT-1P-ET")
+                            .map(|&e| e.form.to_string()),
+                        pres_ind_second_sg: entries
+                            .iter()
+                            .find(|&&e| e.tag == "GM-FH-NT-2P-ET")
+                            .map(|&e| e.form.to_string()),
+                        pres_ind_third_sg: entries
+                            .iter()
+                            .find(|&&e| e.tag == "GM-FH-NT-3P-ET")
+                            .map(|&e| e.form.to_string()),
+                        pres_ind_first_pl: entries
+                            .iter()
+                            .find(|&&e| e.tag == "GM-FH-NT-1P-FT")
+                            .map(|&e| e.form.to_string()),
+                        pres_ind_second_pl: entries
+                            .iter()
+                            .find(|&&e| e.tag == "GM-FH-NT-2P-FT")
+                            .map(|&e| e.form.to_string()),
+                        pres_ind_third_pl: entries
+                            .iter()
+                            .find(|&&e| e.tag == "GM-FH-NT-3P-FT")
+                            .map(|&e| e.form.to_string()),
+                        // Past Indicative
+                        past_ind_first_sg: entries
+                            .iter()
+                            .find(|&&e| e.tag == "GM-FH-ÞT-1P-ET")
+                            .map(|&e| e.form.to_string()),
+                        past_ind_second_sg: entries
+                            .iter()
+                            .find(|&&e| e.tag == "GM-FH-ÞT-2P-ET")
+                            .map(|&e| e.form.to_string()),
+                        past_ind_third_sg: entries
+                            .iter()
+                            .find(|&&e| e.tag == "GM-FH-ÞT-3P-ET")
+                            .map(|&e| e.form.to_string()),
+                        past_ind_first_pl: entries
+                            .iter()
+                            .find(|&&e| e.tag == "GM-FH-ÞT-1P-FT")
+                            .map(|&e| e.form.to_string()),
+                        past_ind_second_pl: entries
+                            .iter()
+                            .find(|&&e| e.tag == "GM-FH-ÞT-2P-FT")
+                            .map(|&e| e.form.to_string()),
+                        past_ind_third_pl: entries
+                            .iter()
+                            .find(|&&e| e.tag == "GM-FH-ÞT-3P-FT")
+                            .map(|&e| e.form.to_string()),
+                    })
+                }
+            }
+            None => None,
+        }
+    }
 }
 
 #[cfg(test)]
@@ -588,20 +679,151 @@ fallegur;168136;lo;alm;fallegasta;EVB-HK-EFET
 fallegur;168136;lo;alm;fallegustu;EVB-HK-NFFT
 fallegur;168136;lo;alm;fallegustu;EVB-HK-ÞFFT
 fallegur;168136;lo;alm;fallegustu;EVB-HK-ÞGFFT
-fallegur;168136;lo;alm;fallegustu;EVB-HK-EFFT";
+fallegur;168136;lo;alm;fallegustu;EVB-HK-EFFT
+læra;435046;so;alm;læra;GM-NH
+læra;435046;so;alm;læri;GM-FH-NT-1P-ET
+læra;435046;so;alm;lærir;GM-FH-NT-2P-ET
+læra;435046;so;alm;lærir;GM-FH-NT-3P-ET
+læra;435046;so;alm;lærum;GM-FH-NT-1P-FT
+læra;435046;so;alm;lærið;GM-FH-NT-2P-FT
+læra;435046;so;alm;læra;GM-FH-NT-3P-FT
+læra;435046;so;alm;lærði;GM-FH-ÞT-1P-ET
+læra;435046;so;alm;lærðir;GM-FH-ÞT-2P-ET
+læra;435046;so;alm;lærði;GM-FH-ÞT-3P-ET
+læra;435046;so;alm;lærðum;GM-FH-ÞT-1P-FT
+læra;435046;so;alm;lærðuð;GM-FH-ÞT-2P-FT
+læra;435046;so;alm;lærðu;GM-FH-ÞT-3P-FT
+læra;435046;so;alm;læri;GM-VH-NT-1P-ET
+læra;435046;so;alm;lærir;GM-VH-NT-2P-ET
+læra;435046;so;alm;læri;GM-VH-NT-3P-ET
+læra;435046;so;alm;lærum;GM-VH-NT-1P-FT
+læra;435046;so;alm;lærið;GM-VH-NT-2P-FT
+læra;435046;so;alm;læri;GM-VH-NT-3P-FT
+læra;435046;so;alm;lærði;GM-VH-ÞT-1P-ET
+læra;435046;so;alm;lærðir;GM-VH-ÞT-2P-ET
+læra;435046;so;alm;lærði;GM-VH-ÞT-3P-ET
+læra;435046;so;alm;lærðum;GM-VH-ÞT-1P-FT
+læra;435046;so;alm;lærðuð;GM-VH-ÞT-2P-FT
+læra;435046;so;alm;lærðu;GM-VH-ÞT-3P-FT
+læra;435046;so;alm;lærast;MM-NH
+læra;435046;so;alm;lærist;MM-FH-NT-1P-ET
+læra;435046;so;alm;lærist;MM-FH-NT-2P-ET
+læra;435046;so;alm;lærist;MM-FH-NT-3P-ET
+læra;435046;so;alm;lærumst;MM-FH-NT-1P-FT
+læra;435046;so;alm;lærist;MM-FH-NT-2P-FT
+læra;435046;so;alm;lærast;MM-FH-NT-3P-FT
+læra;435046;so;alm;lærðist;MM-FH-ÞT-1P-ET
+læra;435046;so;alm;lærðist;MM-FH-ÞT-2P-ET
+læra;435046;so;alm;lærðist;MM-FH-ÞT-3P-ET
+læra;435046;so;alm;lærðumst;MM-FH-ÞT-1P-FT
+læra;435046;so;alm;lærðust;MM-FH-ÞT-2P-FT
+læra;435046;so;alm;lærðust;MM-FH-ÞT-3P-FT
+læra;435046;so;alm;lærist;MM-VH-NT-1P-ET
+læra;435046;so;alm;lærist;MM-VH-NT-2P-ET
+læra;435046;so;alm;lærist;MM-VH-NT-3P-ET
+læra;435046;so;alm;lærumst;MM-VH-NT-1P-FT
+læra;435046;so;alm;lærist;MM-VH-NT-2P-FT
+læra;435046;so;alm;lærist;MM-VH-NT-3P-FT
+læra;435046;so;alm;lærðist;MM-VH-ÞT-1P-ET
+læra;435046;so;alm;lærðist;MM-VH-ÞT-2P-ET
+læra;435046;so;alm;lærðist;MM-VH-ÞT-3P-ET
+læra;435046;so;alm;lærðumst;MM-VH-ÞT-1P-FT
+læra;435046;so;alm;lærðust;MM-VH-ÞT-2P-FT
+læra;435046;so;alm;lærðust;MM-VH-ÞT-3P-FT
+læra;435046;so;alm;lær;GM-BH-ST
+læra;435046;so;alm;lærðu;GM-BH-ET
+læra;435046;so;alm;lærið;GM-BH-FT
+læra;435046;so;alm;lærandi;LHNT
+læra;435046;so;alm;lært;GM-SAGNB
+læra;435046;so;alm;lærst;MM-SAGNB
+læra;435046;so;alm;lærður;LHÞT-SB-KK-NFET
+læra;435046;so;alm;lærðan;LHÞT-SB-KK-ÞFET
+læra;435046;so;alm;lærðum;LHÞT-SB-KK-ÞGFET
+læra;435046;so;alm;lærðs;LHÞT-SB-KK-EFET
+læra;435046;so;alm;lærðir;LHÞT-SB-KK-NFFT
+læra;435046;so;alm;lærða;LHÞT-SB-KK-ÞFFT
+læra;435046;so;alm;lærðum;LHÞT-SB-KK-ÞGFFT
+læra;435046;so;alm;lærðra;LHÞT-SB-KK-EFFT
+læra;435046;so;alm;lærð;LHÞT-SB-KVK-NFET
+læra;435046;so;alm;lærða;LHÞT-SB-KVK-ÞFET
+læra;435046;so;alm;lærðri;LHÞT-SB-KVK-ÞGFET
+læra;435046;so;alm;lærðrar;LHÞT-SB-KVK-EFET
+læra;435046;so;alm;lærðar;LHÞT-SB-KVK-NFFT
+læra;435046;so;alm;lærðar;LHÞT-SB-KVK-ÞFFT
+læra;435046;so;alm;lærðum;LHÞT-SB-KVK-ÞGFFT
+læra;435046;so;alm;lærðra;LHÞT-SB-KVK-EFFT
+læra;435046;so;alm;lært;LHÞT-SB-HK-NFET
+læra;435046;so;alm;lært;LHÞT-SB-HK-ÞFET
+læra;435046;so;alm;lærðu;LHÞT-SB-HK-ÞGFET
+læra;435046;so;alm;lærðs;LHÞT-SB-HK-EFET
+læra;435046;so;alm;lærð;LHÞT-SB-HK-NFFT
+læra;435046;so;alm;lærð;LHÞT-SB-HK-ÞFFT
+læra;435046;so;alm;lærðum;LHÞT-SB-HK-ÞGFFT
+læra;435046;so;alm;lærðra;LHÞT-SB-HK-EFFT
+læra;435046;so;alm;lærði;LHÞT-VB-KK-NFET
+læra;435046;so;alm;lærða;LHÞT-VB-KK-ÞFET
+læra;435046;so;alm;lærða;LHÞT-VB-KK-ÞGFET
+læra;435046;so;alm;lærða;LHÞT-VB-KK-EFET
+læra;435046;so;alm;lærðu;LHÞT-VB-KK-NFFT
+læra;435046;so;alm;lærðu;LHÞT-VB-KK-ÞFFT
+læra;435046;so;alm;lærðu;LHÞT-VB-KK-ÞGFFT
+læra;435046;so;alm;lærðu;LHÞT-VB-KK-EFFT
+læra;435046;so;alm;lærða;LHÞT-VB-KVK-NFET
+læra;435046;so;alm;lærðu;LHÞT-VB-KVK-ÞFET
+læra;435046;so;alm;lærðu;LHÞT-VB-KVK-ÞGFET
+læra;435046;so;alm;lærðu;LHÞT-VB-KVK-EFET
+læra;435046;so;alm;lærðu;LHÞT-VB-KVK-NFFT
+læra;435046;so;alm;lærðu;LHÞT-VB-KVK-ÞFFT
+læra;435046;so;alm;lærðu;LHÞT-VB-KVK-ÞGFFT
+læra;435046;so;alm;lærðu;LHÞT-VB-KVK-EFFT
+læra;435046;so;alm;lærða;LHÞT-VB-HK-NFET
+læra;435046;so;alm;lærða;LHÞT-VB-HK-ÞFET
+læra;435046;so;alm;lærða;LHÞT-VB-HK-ÞGFET
+læra;435046;so;alm;lærða;LHÞT-VB-HK-EFET
+læra;435046;so;alm;lærðu;LHÞT-VB-HK-NFFT
+læra;435046;so;alm;lærðu;LHÞT-VB-HK-ÞFFT
+læra;435046;so;alm;lærðu;LHÞT-VB-HK-ÞGFFT
+læra;435046;so;alm;lærðu;LHÞT-VB-HK-EFFT
+læra;435046;so;alm;lærist;OP-ÞGF-MM-FH-NT-1P-ET
+læra;435046;so;alm;lærist;OP-ÞGF-MM-FH-NT-1P-FT
+læra;435046;so;alm;lærist;OP-ÞGF-MM-FH-NT-2P-ET
+læra;435046;so;alm;lærist;OP-ÞGF-MM-FH-NT-2P-FT
+læra;435046;so;alm;lærist;OP-ÞGF-MM-FH-NT-3P-ET
+læra;435046;so;alm;lærist;OP-ÞGF-MM-FH-NT-3P-FT
+læra;435046;so;alm;lærðist;OP-ÞGF-MM-FH-ÞT-1P-ET
+læra;435046;so;alm;lærðist;OP-ÞGF-MM-FH-ÞT-1P-FT
+læra;435046;so;alm;lærðist;OP-ÞGF-MM-FH-ÞT-2P-ET
+læra;435046;so;alm;lærðist;OP-ÞGF-MM-FH-ÞT-2P-FT
+læra;435046;so;alm;lærðist;OP-ÞGF-MM-FH-ÞT-3P-ET
+læra;435046;so;alm;lærðist;OP-ÞGF-MM-FH-ÞT-3P-FT
+læra;435046;so;alm;lærist;OP-ÞGF-MM-VH-NT-1P-ET
+læra;435046;so;alm;lærist;OP-ÞGF-MM-VH-NT-1P-FT
+læra;435046;so;alm;lærist;OP-ÞGF-MM-VH-NT-2P-ET
+læra;435046;so;alm;lærist;OP-ÞGF-MM-VH-NT-2P-FT
+læra;435046;so;alm;lærist;OP-ÞGF-MM-VH-NT-3P-ET
+læra;435046;so;alm;lærist;OP-ÞGF-MM-VH-NT-3P-FT
+læra;435046;so;alm;lærðist;OP-ÞGF-MM-VH-ÞT-1P-ET
+læra;435046;so;alm;lærðist;OP-ÞGF-MM-VH-ÞT-1P-FT
+læra;435046;so;alm;lærðist;OP-ÞGF-MM-VH-ÞT-2P-ET
+læra;435046;so;alm;lærðist;OP-ÞGF-MM-VH-ÞT-2P-FT
+læra;435046;so;alm;lærðist;OP-ÞGF-MM-VH-ÞT-3P-ET
+læra;435046;so;alm;lærðist;OP-ÞGF-MM-VH-ÞT-3P-FT";
 
     #[test]
     pub fn loads_bin_data() {
         let bin_data = BinData::load(TEST_DATA.as_bytes()).unwrap();
 
-        assert_eq!(3, bin_data.data.len());
+        assert_eq!(4, bin_data.data.len());
 
         assert!(bin_data.data.contains_key("aðalhellir"));
         assert!(bin_data.data.contains_key("aðalhenda"));
+        assert!(bin_data.data.contains_key("fallegur"));
+        assert!(bin_data.data.contains_key("læra"));
 
         assert_eq!(16, bin_data.data.get("aðalhellir").unwrap().len());
         assert_eq!(18, bin_data.data.get("aðalhenda").unwrap().len());
         assert_eq!(120, bin_data.data.get("fallegur").unwrap().len());
+        assert_eq!(128, bin_data.data.get("læra").unwrap().len());
     }
 
     #[test]
@@ -694,5 +916,27 @@ fallegur;168136;lo;alm;fallegustu;EVB-HK-EFFT";
         assert_eq!("fallegu", adjective_entry.neut_acc_pl_weak.unwrap());
         assert_eq!("fallegu", adjective_entry.neut_dat_pl_weak.unwrap());
         assert_eq!("fallegu", adjective_entry.neut_gen_pl_weak.unwrap());
+    }
+
+    #[test]
+    pub fn gets_verb_entry() {
+        let bin_data = BinData::load(TEST_DATA.as_bytes()).unwrap();
+        let verb_entry = bin_data.verb("læra").unwrap();
+
+        assert_eq!("læri", verb_entry.pres_ind_first_sg.unwrap());
+        assert_eq!("lærir", verb_entry.pres_ind_second_sg.unwrap());
+        assert_eq!("lærir", verb_entry.pres_ind_third_sg.unwrap());
+
+        assert_eq!("lærum", verb_entry.pres_ind_first_pl.unwrap());
+        assert_eq!("lærið", verb_entry.pres_ind_second_pl.unwrap());
+        assert_eq!("læra", verb_entry.pres_ind_third_pl.unwrap());
+
+        assert_eq!("lærði", verb_entry.past_ind_first_sg.unwrap());
+        assert_eq!("lærðir", verb_entry.past_ind_second_sg.unwrap());
+        assert_eq!("lærði", verb_entry.past_ind_third_sg.unwrap());
+
+        assert_eq!("lærðum", verb_entry.past_ind_first_pl.unwrap());
+        assert_eq!("lærðuð", verb_entry.past_ind_second_pl.unwrap());
+        assert_eq!("lærðu", verb_entry.past_ind_third_pl.unwrap());
     }
 }
