@@ -25,17 +25,20 @@ on initial run.
         -V, --version    Prints version information
     
     OPTIONS:
-            --binurl <URL>                 URL to fetch BÍN CSV [default:
-                                           https://bin.arnastofnun.is/django/api/nidurhal/?file=SHsnid.csv.zip]
-            --deck <FILE>                  Anki Deck output file [default: deck.apkg]
-            --description <DESCRIPTION>    Anki Deck description [default: Deck for studying Icelandic Vocabulary]
-            --name <NAME>                  Anki Deck name [default: Icelandic Vocabulary]
+            --description <DESCRIPTION>    Anki deck description
+            --name <NAME>                  Anki deck name
+            --output <FILE>                Anki deck output file [default: deck.apkg]
     
     ARGS:
         <wordlist>    List of words, categories, and definitions (tab separated)
 
-The input should be a list of root words, their category, and their
-definition, tab-separated. For example:
+
+The arguments `--description`, `--name`, and `--output` are optional.  If not
+supplied, the default deck will be named *"Icelandic Vocabulary"*, and will be
+written to the file `deck.apkg`.
+
+The input should be a list of root words, their category, and their definition,
+tab-separated. For example:
 
     birta    noun        light, brightness
     dagblað  noun        daily newspaper
@@ -44,7 +47,8 @@ definition, tab-separated. For example:
     læra     verb        to learn, study
     tala     verb        to talk, speak
 
-The categories *noun*, *adjective*, and *verb* are currently supported.
+The categories *noun*, *adjective*, *verb*, *pronoun*, and *phrase* are
+currently supported.
 
 An example input file can be found in the **sample-data** directory.
 

@@ -52,6 +52,13 @@ td {
   font-weight: bold;
   color: #000099;
 }
+.vp {
+  color: #999;
+  font-style: italic;
+}
+.vf {
+  font-weight: bold;
+}
 .ncl {
   width: 12%;
 }
@@ -73,10 +80,10 @@ td {
 
 const NOUN_TMPL: &str = r#"{{FrontSide}}
 <hr id="tt"/>
-<p class="wclass">Noun</p>
+<p class="wclass">Noun — {{Gender}}</p>
 <hr id="definition"/>
 <p class="definition">
- (<em>{{Gender}}</em>) {{Definition}}
+ {{Definition}}
 </p>
 <hr id="forms"/>
 <h3>Indefinite</h3>
@@ -146,9 +153,9 @@ const ADJ_TMPL: &str = r#"{{FrontSide}}
 <table>
  <tr>
   <th class="acl"></th>
-  <th class="afm">m.</th>
-  <th class="afm">f.</th>
-  <th class="afm">n.</th>
+  <th class="afm">masc.</th>
+  <th class="afm">fem.</th>
+  <th class="afm">neut.</th>
  </tr>
  <tr>
   <th class="acl">nom.</th>
@@ -179,9 +186,9 @@ const ADJ_TMPL: &str = r#"{{FrontSide}}
 <table>
  <tr>
   <th class="acl"></th>
-  <th class="afm">m.</th>
-  <th class="afm">f.</th>
-  <th class="afm">n.</th>
+  <th class="afm">masc.</th>
+  <th class="afm">fem.</th>
+  <th class="afm">neut.</th>
  </tr>
  <tr>
   <th class="acl">nom.</th>
@@ -218,31 +225,67 @@ const VERB_TMPL: &str = r#"{{FrontSide}}
 <h3>Present Indicative</h3>
 <table>
  <tr>
-  <td class="vfm">ég {{Present 1st Singular}}</td>
-  <td class="vfm">við {{Present 1st Plural}}</td>
+  <td class="vfm">
+   <span class="vp">ég</span>
+   <span class="vf">{{Present 1st Singular}}</span>
+  </td>
+  <td class="vfm">
+   <span class="vp">við</span> 
+   <span class="vf">{{Present 1st Plural}}</span>
+  </td>
  </tr>
  <tr>
-  <td class="vfm">þú {{Present 2nd Singular}}</td>
-  <td class="vfm">þið {{Present 2nd Plural}}</td>
+  <td class="vfm">
+   <span class="vp">þú</span>
+   <span class="vf">{{Present 2nd Singular}}</span>
+  </td>
+  <td class="vfm">
+   <span class="vp">þið</span>
+   <span class="vf">{{Present 2nd Plural}}</span>
+  </td>
  </tr>
  <tr>
-  <td class="vfm">hann/hún/það {{Present 3rd Singular}}</td>
-  <td class="vfm">þeir/þær/þau {{Present 3rd Plural}}</td>
+  <td class="vfm">
+   <span class="vp">hann/hún/það</span>
+   <span class="vf">{{Present 3rd Singular}}</span>
+  </td>
+  <td class="vfm">
+   <span class="vp">þeir/þær/þau</span>
+   <span class="vf">{{Present 3rd Plural}}</span>
+  </td>
  </tr>
 </table>
 <h3>Past Indicative</h3>
 <table>
  <tr>
-  <td class="vfm">ég {{Past 1st Singular}}</td>
-  <td class="vfm">við {{Past 1st Plural}}</td>
+  <td class="vfm">
+   <span class="vp">ég</span>
+   <span class="vf">{{Past 1st Singular}}</span>
+  </td>
+  <td class="vfm">
+   <span class="vp">við</span>
+   <span class="vf">{{Past 1st Plural}}</span>
+  </td>
  </tr>
  <tr>
-  <td class="vfm">þú {{Past 2nd Singular}}</td>
-  <td class="vfm">þið {{Past 2nd Plural}}</td>
+  <td class="vfm">
+   <span class="vp">þú</span>
+   <span class="vf">{{Past 2nd Singular}}</span>
+  </td>
+  <td class="vfm">
+   <span class="vp">þið</span>
+   <span class="vf">{{Past 2nd Plural}}</span>
+  </td>
  </tr>
  <tr>
-  <td class="vfm">hann/hún/það {{Past 3rd Singular}}</td>
-  <td class="vfm">þeir/þær/þau {{Past 3rd Plural}}</td>
+  <td class="vfm">
+   <span class="vp">hann/hún/það</span>
+   <span class="vf">{{Past 3rd Singular}}</span>
+  </td>
+  <td class="vfm">
+   <span class="vp">þeir/þær/þau</span>
+   <span class="vf">{{Past 3rd Plural}}</span>
+  </td>
  </tr>
 </table>"#;
 
@@ -625,18 +668,9 @@ fn app_config(project_dirs: &ProjectDirs) -> AppConfig {
         .version("1.0")
         .author("Seth Morabito")
         .arg(
-            Arg::with_name("binurl")
-                .help("URL to fetch BÍN CSV")
-                .long("binurl")
-                .value_name("URL")
-                .takes_value(true)
-                .default_value(BIN_CSV_URL)
-                .required(false),
-        )
-        .arg(
-            Arg::with_name("deck")
-                .help("Anki Deck output file")
-                .long("deck")
+            Arg::with_name("output")
+                .help("Anki deck output file")
+                .long("output")
                 .value_name("FILE")
                 .takes_value(true)
                 .default_value("deck.apkg")
@@ -644,20 +678,18 @@ fn app_config(project_dirs: &ProjectDirs) -> AppConfig {
         )
         .arg(
             Arg::with_name("name")
-                .help("Anki Deck name")
+                .help("Anki deck name")
                 .long("name")
                 .value_name("NAME")
                 .takes_value(true)
-                .default_value(DEFAULT_DECK_NAME)
                 .required(false),
         )
         .arg(
             Arg::with_name("description")
-                .help("Anki Deck description")
+                .help("Anki deck description")
                 .long("description")
                 .value_name("DESCRIPTION")
                 .takes_value(true)
-                .default_value(DEFAULT_DECK_DESCRIPTION)
                 .required(false),
         )
         .arg(
@@ -669,12 +701,7 @@ fn app_config(project_dirs: &ProjectDirs) -> AppConfig {
 
     let bin_data: PathBuf = project_dirs.data_dir().join(DEFAULT_BIN_CSV);
 
-    let bin_csv_url = match arg_matches.value_of("binurl") {
-        Some(binurl) => binurl.to_string(),
-        None => BIN_CSV_URL.to_string(),
-    };
-
-    let deck: String = match arg_matches.value_of("deck") {
+    let output: String = match arg_matches.value_of("output") {
         Some(deck) => deck.to_string(),
         None => DEFAULT_DECK.to_string(),
     };
@@ -694,14 +721,13 @@ fn app_config(project_dirs: &ProjectDirs) -> AppConfig {
         None => Path::new("wordlist.txt").to_path_buf(),
     };
 
-    AppConfig { bin_csv_url, bin_data, deck, deck_name, deck_description, wordlist }
+    AppConfig { bin_data, output, deck_name, deck_description, wordlist }
 }
 
 #[derive(Debug)]
 struct AppConfig {
-    bin_csv_url: String,
     bin_data: PathBuf,
-    deck: String,
+    output: String,
     deck_name: String,
     deck_description: String,
     wordlist: PathBuf,
@@ -717,9 +743,9 @@ fn setup_project_dirs(project_dirs: &ProjectDirs) -> Result<(), ProgramError> {
 async fn get_bin_csv(app_config: &AppConfig) -> Result<(), ProgramError> {
     let mut tmp_file = tempfile()?;
 
-    println!("Downloading BIN data from URL {:?}...", &app_config.bin_csv_url);
+    println!("Downloading BIN data from URL {:?}...", BIN_CSV_URL);
 
-    let response = reqwest::get(&app_config.bin_csv_url).await?;
+    let response = reqwest::get(BIN_CSV_URL).await?;
     let content = response.bytes().await?;
 
     tmp_file.write_all(content.as_ref())?;
@@ -808,7 +834,7 @@ async fn main() -> Result<(), ProgramError> {
             let deck = generate_deck(&dictionary, &bin_data, &config)?;
 
             println!("Saving Anki deck...");
-            deck.write_to_file(&config.deck)?;
+            deck.write_to_file(&config.output)?;
 
             println!("Done!");
         }
