@@ -19,10 +19,11 @@ const BIN_CSV_URL: &str = "https://bin.arnastofnun.is/django/api/nidurhal/?file=
 const NOUN_MODEL_ID: usize = 1625673414000;
 const ADJECTIVE_MODEL_ID: usize = 1625673414010;
 const VERB_MODEL_ID: usize = 1625673414020;
-const DECK_ID: usize = 1625673414030;
+const ADVERB_MODEL_ID: usize = 1625673414030;
+const PHRASE_MODEL_ID: usize = 1625673414040;
+const DECK_ID: usize = 1625673415000;
 
-const CSS: &str = r#"
-.card {
+const CSS: &str = r#".card {
   font-family: arial;
   font-size: 20px;
   text-align: center;
@@ -39,155 +40,217 @@ td {
   border: 1px solid #ccc;
   padding: 6px;
 }
+.wclass {
+  color: #009900;
+  font-weight: bold;
+}
 .definition {
   font-size: 110%;
   font-weight: bold;
   color: #000099;
+}
+.ncl {
+  width: 12%;
+}
+.nfm {
+  width: 44%;
+}
+.acl {
+  width: 13%;
+}
+.afm {
+  width: 29%;
+}
+.vfm {
+  width: 50%;
 }"#;
 
 const NOUN_TMPL: &str = r#"{{FrontSide}}
+<hr id="tt"/>
+<p class="wclass">Noun</p>
 <hr id="definition"/>
- <p class="definition">
-  (<em>{{Gender}}</em>) {{Definition}}
- </p>
+<p class="definition">
+ (<em>{{Gender}}</em>) {{Definition}}
+</p>
 <hr id="forms"/>
+<h3>Indefinite</h3>
 <table>
  <tr>
-  <th></th>
-  <th>Singular (Indefinite)</th>
-  <th>Singluar (Definite)</th>
-  <th>Plural (Indefinite)</th>
-  <th>Plural (Definite)</th>
+  <th class="ncl"></th>
+  <th class="nfm">Singular</th>
+  <th class="nfm">Plural</th>
  </tr>
  <tr>
-  <th>nom.</th>
-  <td>{{Nominative Singular}}</td>
-  <td>{{Nominative Singular Definite}}</td>
-  <td>{{Nominative Plural}}</td>
-  <td>{{Nominative Plural Definite}}</td>
+  <th class="ncl">nom.</th>
+  <td class="nfm">{{Nominative Singular}}</td>
+  <td class="nfm">{{Nominative Plural}}</td>
  </tr>
  <tr>
-  <th>acc.</th>
-  <td>{{Accusative Singular}}</td>
-  <td>{{Accusative Singular Definite}}</td>
-  <td>{{Accusative Plural}}</td>
-  <td>{{Accusative Plural Definite}}</td>
+  <th class="ncl">acc.</th>
+  <td class="nfm">{{Accusative Singular}}</td>
+  <td class="nfm">{{Accusative Plural}}</td>
  </tr>
  <tr>
-  <th>dat.</th>
-  <td>{{Dative Singular}}</td>
-  <td>{{Dative Singular Definite}}</td>
-  <td>{{Dative Plural}}</td>
-  <td>{{Dative Plural Definite}}</td>
+  <th class="ncl">dat.</th>
+  <td class="nfm">{{Dative Singular}}</td>
+  <td class="nfm">{{Dative Plural}}</td>
  </tr>
  <tr>
-  <th>gen.</th>
-  <td>{{Genitive Singular}}</td>
-  <td>{{Genitive Singular Definite}}</td>
-  <td>{{Genitive Plural}}</td>
-  <td>{{Genitive Plural Definite}}</td>
+  <th class="ncl">gen.</th>
+  <td class="nfm">{{Genitive Singular}}</td>
+  <td class="nfm">{{Genitive Plural}}</td>
+ </tr>
+</table>
+<h3>Definite</h3>
+<table>
+ <tr>
+  <th class="ncl"></th>
+  <th class="nfm">Singular</th>
+  <th class="nfm">Plural</th>
+ </tr>
+ <tr>
+  <th class="ncl">nom.</th>
+  <td class="nfm">{{Nominative Singular Definite}}</td>
+  <td class="nfm">{{Nominative Plural Definite}}</td>
+ </tr>
+ <tr>
+  <th class="ncl">acc.</th>
+  <td class="nfm">{{Accusative Singular Definite}}</td>
+  <td class="nfm">{{Accusative Plural Definite}}</td>
+ </tr>
+ <tr>
+  <th class="ncl">dat.</th>
+  <td class="nfm">{{Dative Singular Definite}}</td>
+  <td class="nfm">{{Dative Plural Definite}}</td>
+ </tr>
+ <tr>
+  <th class="ncl">gen.</th>
+  <td class="nfm">{{Genitive Singular Definite}}</td>
+  <td class="nfm">{{Genitive Plural Definite}}</td>
  </tr>
 </table>"#;
 
 const ADJ_TMPL: &str = r#"{{FrontSide}}
+<hr id="tt"/>
+<p class="wclass">Adjective</p>
 <hr id="definition"/>
- <p class="definition">{{Definition}}</p>
+<p class="definition">{{Definition}}</p>
 <hr id="forms"/>
 <h3>Singular</h3>
 <table>
  <tr>
-  <th></th>
-  <th>m.</th>
-  <th>f.</th>
-  <th>n.</th>
+  <th class="acl"></th>
+  <th class="afm">m.</th>
+  <th class="afm">f.</th>
+  <th class="afm">n.</th>
  </tr>
  <tr>
-  <th>nom.</th>
-  <td>{{Masculine Singular Nominative}}</td>
-  <td>{{Feminine Singular Nominative}}</td>
-  <td>{{Neuter Singular Nominative}}</td>
+  <th class="acl">nom.</th>
+  <td class="afm">{{Masculine Singular Nominative}}</td>
+  <td class="afm">{{Feminine Singular Nominative}}</td>
+  <td class="afm">{{Neuter Singular Nominative}}</td>
  </tr>
  <tr>
-  <th>acc.</th>
-  <td>{{Masculine Singular Accusative}}</td>
-  <td>{{Feminine Singular Accusative}}</td>
-  <td>{{Neuter Singular Accusative}}</td>
+  <th class="acl">acc.</th>
+  <td class="afm">{{Masculine Singular Accusative}}</td>
+  <td class="afm">{{Feminine Singular Accusative}}</td>
+  <td class="afm">{{Neuter Singular Accusative}}</td>
  </tr>
  <tr>
-  <th>dat.</th>
-  <td>{{Masculine Singular Dative}}</td>
-  <td>{{Feminine Singular Dative}}</td>
-  <td>{{Neuter Singular Dative}}</td>
+  <th class="acl">dat.</th>
+  <td class="afm">{{Masculine Singular Dative}}</td>
+  <td class="afm">{{Feminine Singular Dative}}</td>
+  <td class="afm">{{Neuter Singular Dative}}</td>
  </tr>
  <tr>
-  <th>gen.</th>
-  <td>{{Masculine Singular Genitive}}</td>
-  <td>{{Feminine Singular Genitive}}</td>
-  <td>{{Neuter Singular Genitive}}</td>
+  <th class="acl">gen.</th>
+  <td class="afm">{{Masculine Singular Genitive}}</td>
+  <td class="afm">{{Feminine Singular Genitive}}</td>
+  <td class="afm">{{Neuter Singular Genitive}}</td>
  </tr>
 </table>
 <h3>Plural</h3>
 <table>
  <tr>
-  <th></th>
-  <th>m.</th>
-  <th>f.</th>
-  <th>n.</th>
+  <th class="acl"></th>
+  <th class="afm">m.</th>
+  <th class="afm">f.</th>
+  <th class="afm">n.</th>
  </tr>
  <tr>
-  <th>nom.</th>
-  <td>{{Masculine Plural Nominative}}</td>
-  <td>{{Feminine Plural Nominative}}</td>
-  <td>{{Neuter Plural Nominative}}</td>
+  <th class="acl">nom.</th>
+  <td class="afm">{{Masculine Plural Nominative}}</td>
+  <td class="afm">{{Feminine Plural Nominative}}</td>
+  <td class="afm">{{Neuter Plural Nominative}}</td>
  </tr>
  <tr>
-  <th>acc.</th>
-  <td>{{Masculine Plural Accusative}}</td>
-  <td>{{Feminine Plural Accusative}}</td>
-  <td>{{Neuter Plural Accusative}}</td>
+  <th class="acl">acc.</th>
+  <td class="afm">{{Masculine Plural Accusative}}</td>
+  <td class="afm">{{Feminine Plural Accusative}}</td>
+  <td class="afm">{{Neuter Plural Accusative}}</td>
  </tr>
  <tr>
-  <th>dat.</th>
-  <td>{{Masculine Plural Dative}}</td>
-  <td>{{Feminine Plural Dative}}</td>
-  <td>{{Neuter Plural Dative}}</td>
+  <th class="acl">dat.</th>
+  <td class="afm">{{Masculine Plural Dative}}</td>
+  <td class="afm">{{Feminine Plural Dative}}</td>
+  <td class="afm">{{Neuter Plural Dative}}</td>
  </tr>
  <tr>
-  <th>gen.</th>
-  <td>{{Masculine Plural Genitive}}</td>
-  <td>{{Feminine Plural Genitive}}</td>
-  <td>{{Neuter Plural Genitive}}</td>
+  <th class="acl">gen.</th>
+  <td class="afm">{{Masculine Plural Genitive}}</td>
+  <td class="afm">{{Feminine Plural Genitive}}</td>
+  <td class="afm">{{Neuter Plural Genitive}}</td>
  </tr>
 </table>"#;
 
 const VERB_TMPL: &str = r#"{{FrontSide}}
+<hr id="tt"/>
+<p class="wclass">Verb</p>
 <hr id="definition"/>
- <p class="definition">{{Definition}}</p>
+<p class="definition">{{Definition}}</p>
 <hr id="forms"/>
 <h3>Present Indicative</h3>
 <table>
  <tr>
-  <td>ég {{Present 1st Singular}}</td><td>við {{Present 1st Plural}}</td>
+  <td class="vfm">ég {{Present 1st Singular}}</td>
+  <td class="vfm">við {{Present 1st Plural}}</td>
  </tr>
  <tr>
-  <td>þú {{Present 2nd Singular}}</td><td>þið {{Present 2nd Plural}}</td>
+  <td class="vfm">þú {{Present 2nd Singular}}</td>
+  <td class="vfm">þið {{Present 2nd Plural}}</td>
  </tr>
  <tr>
-  <td>hann/hún/það {{Present 3rd Singular}}</td><td>þeir/þær/þau {{Present 3rd Plural}}</td>
+  <td class="vfm">hann/hún/það {{Present 3rd Singular}}</td>
+  <td class="vfm">þeir/þær/þau {{Present 3rd Plural}}</td>
  </tr>
 </table>
 <h3>Past Indicative</h3>
 <table>
  <tr>
-  <td>ég {{Past 1st Singular}}</td><td>við {{Past 1st Plural}}</td>
+  <td class="vfm">ég {{Past 1st Singular}}</td>
+  <td class="vfm">við {{Past 1st Plural}}</td>
  </tr>
  <tr>
-  <td>þú {{Past 2nd Singular}}</td><td>þið {{Past 2nd Plural}}</td>
+  <td class="vfm">þú {{Past 2nd Singular}}</td>
+  <td class="vfm">þið {{Past 2nd Plural}}</td>
  </tr>
  <tr>
-  <td>hann/hún/það {{Past 3rd Singular}}</td><td>þeir/þær/þau {{Past 3rd Plural}}</td>
+  <td class="vfm">hann/hún/það {{Past 3rd Singular}}</td>
+  <td class="vfm">þeir/þær/þau {{Past 3rd Plural}}</td>
  </tr>
 </table>"#;
+
+const ADVERB_TMPL: &str = r#"{{FrontSide}}
+<hr id="tt"/>
+<p class="wclass">Phrase</p>
+<hr id="definition"/>
+<p class="definition">{{Definition}}</p>"#;
+
+const PHRASE_TMPL: &str = r#"{{FrontSide}}
+<hr id="tt"/>
+<p class="wclass">Phrase</p>
+<hr id="definition"/>
+<p class="definition">{{Definition}}</p>"#;
 
 #[derive(Error, Debug)]
 pub enum ProgramError {
@@ -217,6 +280,7 @@ fn generate_deck(dictionary: &Dictionary, bin_data: &BinData) -> Result<Deck, Pr
         ADJECTIVE_MODEL_ID,
         "Icelandic Adjective",
         vec![
+            Field::new("Root"),
             Field::new("Definition"),
             Field::new("Masculine Singular Nominative"),
             Field::new("Feminine Singular Nominative"),
@@ -243,9 +307,7 @@ fn generate_deck(dictionary: &Dictionary, bin_data: &BinData) -> Result<Deck, Pr
             Field::new("Feminine Plural Genitive"),
             Field::new("Neuter Plural Genitive"),
         ],
-        vec![Template::new("Icelandic Adjective")
-            .qfmt("<h1>{{Masculine Singular Nominative}}</h1>")
-            .afmt(ADJ_TMPL)],
+        vec![Template::new("Icelandic Adjective").qfmt("<h1>{{Root}}</h1>").afmt(ADJ_TMPL)],
         Some(CSS),
         None,
         None,
@@ -257,6 +319,7 @@ fn generate_deck(dictionary: &Dictionary, bin_data: &BinData) -> Result<Deck, Pr
         NOUN_MODEL_ID,
         "Icelandic Noun",
         vec![
+            Field::new("Root"),
             Field::new("Gender"),
             Field::new("Definition"),
             Field::new("Nominative Singular"),
@@ -276,9 +339,7 @@ fn generate_deck(dictionary: &Dictionary, bin_data: &BinData) -> Result<Deck, Pr
             Field::new("Genitive Plural"),
             Field::new("Genitive Plural Definite"),
         ],
-        vec![Template::new("Icelandic Noun")
-            .qfmt("<h1>{{Nominative Singular}}</h1>")
-            .afmt(NOUN_TMPL)],
+        vec![Template::new("Icelandic Noun").qfmt("<h1>{{Root}}</h1>").afmt(NOUN_TMPL)],
         Some(CSS),
         None,
         None,
@@ -290,7 +351,7 @@ fn generate_deck(dictionary: &Dictionary, bin_data: &BinData) -> Result<Deck, Pr
         VERB_MODEL_ID,
         "Icelandic Verb",
         vec![
-            Field::new("Infinitive"),
+            Field::new("Root"),
             Field::new("Definition"),
             Field::new("Present 1st Singular"),
             Field::new("Present 2nd Singular"),
@@ -305,7 +366,31 @@ fn generate_deck(dictionary: &Dictionary, bin_data: &BinData) -> Result<Deck, Pr
             Field::new("Past 2nd Plural"),
             Field::new("Past 3rd Plural"),
         ],
-        vec![Template::new("Icelandic Verb").qfmt("<h1>að {{Infinitive}}</h1>").afmt(VERB_TMPL)],
+        vec![Template::new("Icelandic Verb").qfmt("<h1>að {{Root}}</h1>").afmt(VERB_TMPL)],
+        Some(CSS),
+        None,
+        None,
+        None,
+        None,
+    );
+
+    let adverb_model = Model::new_with_options(
+        ADVERB_MODEL_ID,
+        "Icelandic Adverb",
+        vec![Field::new("Root"), Field::new("Definition")],
+        vec![Template::new("Icelandic Adverb").qfmt("<h1>{{Root}}</h1>").afmt(ADVERB_TMPL)],
+        Some(CSS),
+        None,
+        None,
+        None,
+        None,
+    );
+
+    let phrase_model = Model::new_with_options(
+        PHRASE_MODEL_ID,
+        "Icelandic Phrase",
+        vec![Field::new("Root"), Field::new("Definition")],
+        vec![Template::new("Icelandic Phrase").qfmt("<h1>{{Root}}</h1>").afmt(PHRASE_TMPL)],
         Some(CSS),
         None,
         None,
@@ -331,6 +416,16 @@ fn generate_deck(dictionary: &Dictionary, bin_data: &BinData) -> Result<Deck, Pr
                     deck.add_note(note)
                 }
             }
+            Category::Adverb => {
+                if let Some(note) = simple_note(&root, definition, &adverb_model) {
+                    deck.add_note(note)
+                }
+            }
+            Category::Phrase => {
+                if let Some(note) = simple_note(&root, definition, &phrase_model) {
+                    deck.add_note(note)
+                }
+            }
         }
     }
 
@@ -343,6 +438,7 @@ fn adjective(root: &str, bin_data: &BinData, definition: &str, model: &Model) ->
             Note::new(
                 model.clone(),
                 vec![
+                    root,
                     definition,
                     &adjective_entry.masc_nom_sg_strong.unwrap_or_else(|| "—".to_string()),
                     &adjective_entry.fem_nom_sg_strong.unwrap_or_else(|| "—".to_string()),
@@ -382,6 +478,7 @@ fn noun(root: &str, bin_data: &BinData, definition: &str, model: &Model) -> Opti
             Note::new(
                 model.clone(),
                 vec![
+                    root,
                     match noun_entry.gender {
                         Gender::Masculine => "Masculine",
                         Gender::Feminine => "Feminine",
@@ -438,6 +535,10 @@ fn verb(root: &str, bin_data: &BinData, definition: &str, model: &Model) -> Opti
         ),
         _ => None,
     }
+}
+
+fn simple_note(root: &str, definition: &str, model: &Model) -> Option<Note> {
+    Some(Note::new(model.clone(), vec![root, definition]).unwrap())
 }
 
 /// Read application config from command line arguments.

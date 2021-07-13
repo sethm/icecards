@@ -8,6 +8,8 @@ pub enum Category {
     Noun,
     Adjective,
     Verb,
+    Adverb,
+    Phrase,
 }
 
 impl FromStr for Category {
@@ -18,6 +20,8 @@ impl FromStr for Category {
             "noun" | "nouns" => Ok(Category::Noun),
             "adjective" | "adjectives" => Ok(Category::Adjective),
             "verb" | "verbs" => Ok(Category::Verb),
+            "adverb" | "adverbs" => Ok(Category::Adverb),
+            "phrase" | "phrases" => Ok(Category::Phrase),
             _ => Err(()),
         }
     }
@@ -50,14 +54,13 @@ impl Dictionary {
 
         for record in reader.records().flatten() {
             if let (Some(root), Some(category)) = (record.get(0), record.get(1)) {
-                let key = DictionaryKey {
-                    root: root.to_string(),
-                    category: Category::from_str(category).unwrap(),
-                };
+                if let Ok(found_category) = Category::from_str(category) {
+                    let key = DictionaryKey { root: root.to_string(), category: found_category };
 
-                let definition = record.get(2).unwrap_or("—");
+                    let definition = record.get(2).unwrap_or("—");
 
-                dictionary.entries.insert(key, definition.to_string());
+                    dictionary.entries.insert(key, definition.to_string());
+                }
             }
         }
 
