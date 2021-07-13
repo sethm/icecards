@@ -25,9 +25,11 @@ on initial run.
         -V, --version    Prints version information
     
     OPTIONS:
-            --binurl <URL>    URL to fetch BÍN CSV [default:
-                              https://bin.arnastofnun.is/django/api/nidurhal/?file=SHsnid.csv.zip]
-            --deck <FILE>     Anki Deck output file [default: deck.apkg]
+            --binurl <URL>                 URL to fetch BÍN CSV [default:
+                                           https://bin.arnastofnun.is/django/api/nidurhal/?file=SHsnid.csv.zip]
+            --deck <FILE>                  Anki Deck output file [default: deck.apkg]
+            --description <DESCRIPTION>    Anki Deck description [default: Deck for studying Icelandic Vocabulary]
+            --name <NAME>                  Anki Deck name [default: Icelandic Vocabulary]
     
     ARGS:
         <wordlist>    List of words, categories, and definitions (tab separated)
