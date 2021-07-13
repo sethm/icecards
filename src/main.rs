@@ -13,6 +13,8 @@ use zip::result::ZipError;
 mod bindata;
 mod dictionary;
 
+const DEFAULT_DECK_NAME: &str = "Icelandic Vocabulary";
+const DEFAULT_DECK_DESCRIPTION: &str = "Deck for studying Icelandic Vocabulary";
 const DEFAULT_BIN_CSV: &str = "SHsnid.csv";
 const DEFAULT_DECK: &str = "deck.apkg";
 const BIN_CSV_URL: &str = "https://bin.arnastofnun.is/django/api/nidurhal/?file=SHsnid.csv.zip";
@@ -21,6 +23,7 @@ const ADJECTIVE_MODEL_ID: usize = 1625673414010;
 const VERB_MODEL_ID: usize = 1625673414020;
 const ADVERB_MODEL_ID: usize = 1625673414030;
 const PHRASE_MODEL_ID: usize = 1625673414040;
+const PRONOUN_MODEL_ID: usize = 1625673414050;
 const DECK_ID: usize = 1625673415000;
 
 const CSS: &str = r#".card {
@@ -54,6 +57,9 @@ td {
 }
 .nfm {
   width: 44%;
+}
+.pfm {
+  width: 88%;
 }
 .acl {
   width: 13%;
@@ -252,6 +258,31 @@ const PHRASE_TMPL: &str = r#"{{FrontSide}}
 <hr id="definition"/>
 <p class="definition">{{Definition}}</p>"#;
 
+const PRONOUN_TMPL: &str = r#"{{FrontSide}}
+<hr id="tt"/>
+<p class="wclass">Pronoun</p>
+<hr id="definition"/>
+<p class="definition">{{Definition}}</p>
+<hr id="forms"/>
+<table>
+ <tr>
+  <th class="acl">nom.</th>
+  <td class="pfm">{{Nominative}}</td>
+ </tr>
+ <tr>
+  <th class="acl">acc.</th>
+  <td class="pfm">{{Accusative}}</td>
+ </tr>
+ <tr>
+  <th class="acl">dat.</th>
+  <td class="pfm">{{Dative}}</td>
+ </tr>
+ <tr>
+  <th class="acl">gen.</th>
+  <td class="pfm">{{Genitive}}</td>
+ </tr>
+</table>"#;
+
 #[derive(Error, Debug)]
 pub enum ProgramError {
     #[error("cannot access configuration")]
@@ -272,9 +303,12 @@ pub enum ProgramError {
     Anki(#[from] genanki_rs::Error),
 }
 
-fn generate_deck(dictionary: &Dictionary, bin_data: &BinData) -> Result<Deck, ProgramError> {
-    let mut deck =
-        Deck::new(DECK_ID, "Icelandic Vocabulary", "Deck for studying Icelandic Vocabulary");
+fn generate_deck(
+    dictionary: &Dictionary,
+    bin_data: &BinData,
+    config: &AppConfig,
+) -> Result<Deck, ProgramError> {
+    let mut deck = Deck::new(DECK_ID, &config.deck_name, &config.deck_description);
 
     let adjective_model = Model::new_with_options(
         ADJECTIVE_MODEL_ID,
@@ -398,6 +432,25 @@ fn generate_deck(dictionary: &Dictionary, bin_data: &BinData) -> Result<Deck, Pr
         None,
     );
 
+    let pronoun_model = Model::new_with_options(
+        PRONOUN_MODEL_ID,
+        "Icelandic Pronoun",
+        vec![
+            Field::new("Root"),
+            Field::new("Definition"),
+            Field::new("Nominative"),
+            Field::new("Accusative"),
+            Field::new("Dative"),
+            Field::new("Genitive"),
+        ],
+        vec![Template::new("Icelandic Pronoun").qfmt("<h1>{{Root}}</h1>").afmt(PRONOUN_TMPL)],
+        Some(CSS),
+        None,
+        None,
+        None,
+        None,
+    );
+
     for (key, definition) in &dictionary.entries {
         let root = &key.root;
         match key.category {
@@ -423,6 +476,11 @@ fn generate_deck(dictionary: &Dictionary, bin_data: &BinData) -> Result<Deck, Pr
             }
             Category::Phrase => {
                 if let Some(note) = simple_note(&root, definition, &phrase_model) {
+                    deck.add_note(note)
+                }
+            }
+            Category::Pronoun => {
+                if let Some(note) = pronoun(&root, bin_data, definition, &pronoun_model) {
                     deck.add_note(note)
                 }
             }
@@ -537,6 +595,26 @@ fn verb(root: &str, bin_data: &BinData, definition: &str, model: &Model) -> Opti
     }
 }
 
+fn pronoun(root: &str, bin_data: &BinData, definition: &str, model: &Model) -> Option<Note> {
+    match bin_data.pronoun(root) {
+        Some(pronoun_entry) => Some(
+            Note::new(
+                model.clone(),
+                vec![
+                    root,
+                    definition,
+                    &pronoun_entry.nom.unwrap_or_else(|| "—".to_string()),
+                    &pronoun_entry.acc.unwrap_or_else(|| "—".to_string()),
+                    &pronoun_entry.dat.unwrap_or_else(|| "—".to_string()),
+                    &pronoun_entry.gen.unwrap_or_else(|| "—".to_string()),
+                ],
+            )
+            .unwrap(),
+        ),
+        _ => None,
+    }
+}
+
 fn simple_note(root: &str, definition: &str, model: &Model) -> Option<Note> {
     Some(Note::new(model.clone(), vec![root, definition]).unwrap())
 }
@@ -565,6 +643,24 @@ fn app_config(project_dirs: &ProjectDirs) -> AppConfig {
                 .required(false),
         )
         .arg(
+            Arg::with_name("name")
+                .help("Anki Deck name")
+                .long("name")
+                .value_name("NAME")
+                .takes_value(true)
+                .default_value(DEFAULT_DECK_NAME)
+                .required(false),
+        )
+        .arg(
+            Arg::with_name("description")
+                .help("Anki Deck description")
+                .long("description")
+                .value_name("DESCRIPTION")
+                .takes_value(true)
+                .default_value(DEFAULT_DECK_DESCRIPTION)
+                .required(false),
+        )
+        .arg(
             Arg::with_name("wordlist")
                 .help("List of words, categories, and definitions (tab separated)")
                 .required(true),
@@ -583,12 +679,22 @@ fn app_config(project_dirs: &ProjectDirs) -> AppConfig {
         None => DEFAULT_DECK.to_string(),
     };
 
+    let deck_name: String = match arg_matches.value_of("name") {
+        Some(name) => name.to_string(),
+        None => DEFAULT_DECK_NAME.to_string(),
+    };
+
+    let deck_description: String = match arg_matches.value_of("description") {
+        Some(description) => description.to_string(),
+        None => DEFAULT_DECK_DESCRIPTION.to_string(),
+    };
+
     let wordlist: PathBuf = match arg_matches.value_of("wordlist") {
         Some(wordlist) => Path::new(wordlist).to_path_buf(),
         None => Path::new("wordlist.txt").to_path_buf(),
     };
 
-    AppConfig { bin_csv_url, bin_data, deck, wordlist }
+    AppConfig { bin_csv_url, bin_data, deck, deck_name, deck_description, wordlist }
 }
 
 #[derive(Debug)]
@@ -596,14 +702,14 @@ struct AppConfig {
     bin_csv_url: String,
     bin_data: PathBuf,
     deck: String,
+    deck_name: String,
+    deck_description: String,
     wordlist: PathBuf,
 }
 
 fn setup_project_dirs(project_dirs: &ProjectDirs) -> Result<(), ProgramError> {
-    let data_dir = project_dirs.data_dir();
-    let config_dir = project_dirs.config_dir();
-    std::fs::create_dir_all(data_dir)?;
-    std::fs::create_dir_all(config_dir)?;
+    std::fs::create_dir_all(project_dirs.data_dir())?;
+    std::fs::create_dir_all(project_dirs.config_dir())?;
 
     Ok(())
 }
@@ -699,7 +805,7 @@ async fn main() -> Result<(), ProgramError> {
             let bin_data = BinData::load(bin_data_file)?;
 
             println!("Starting Anki deck generation...");
-            let deck = generate_deck(&dictionary, &bin_data)?;
+            let deck = generate_deck(&dictionary, &bin_data, &config)?;
 
             println!("Saving Anki deck...");
             deck.write_to_file(&config.deck)?;

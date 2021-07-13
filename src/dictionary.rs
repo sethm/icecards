@@ -10,6 +10,7 @@ pub enum Category {
     Verb,
     Adverb,
     Phrase,
+    Pronoun,
 }
 
 impl FromStr for Category {
@@ -22,6 +23,7 @@ impl FromStr for Category {
             "verb" | "verbs" => Ok(Category::Verb),
             "adverb" | "adverbs" => Ok(Category::Adverb),
             "phrase" | "phrases" => Ok(Category::Phrase),
+            "pronoun" | "pronouns" => Ok(Category::Pronoun),
             _ => Err(()),
         }
     }

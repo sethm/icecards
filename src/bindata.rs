@@ -124,6 +124,14 @@ pub struct AdjectiveEntry {
     pub neut_gen_pl_weak: Option<String>,
 }
 
+#[derive(Debug, Eq, PartialEq)]
+pub struct PronounEntry {
+    pub nom: Option<String>,
+    pub acc: Option<String>,
+    pub dat: Option<String>,
+    pub gen: Option<String>,
+}
+
 pub struct BinData {
     pub data: BTreeMap<String, Vec<BinEntry>>,
 }
@@ -153,6 +161,51 @@ impl BinData {
         }
 
         Ok(bin_data)
+    }
+
+    pub fn pronoun(&self, root: &str) -> Option<PronounEntry> {
+        // Personal pronouns require some special handling.
+        let (entries, tag) = match root {
+            "ég" => (self.data.get("ég"), Some("FET")),
+            "við" => (self.data.get("ég"), Some("FFT")),
+            "þú" => (self.data.get("þú"), Some("FET")),
+            "þið" => (self.data.get("þú"), Some("FFT")),
+            "hann" => (self.data.get("hann"), Some("FET")),
+            "þeir" => (self.data.get("hann"), Some("FFT")),
+            "hún" => (self.data.get("hún"), Some("FET")),
+            "þær" => (self.data.get("hún"), Some("FFT")),
+            "það" => (self.data.get("það"), Some("FET")),
+            "þau" => (self.data.get("það"), Some("FFT")),
+            _ => (None, None),
+        };
+
+        match (entries, tag) {
+            (Some(entries), Some(tag)) => {
+                if entries.is_empty() {
+                    None
+                } else {
+                    Some(PronounEntry {
+                        nom: entries
+                            .iter()
+                            .find(|&e| e.tag == format!("N{}", tag))
+                            .map(|e| e.form.to_string()),
+                        acc: entries
+                            .iter()
+                            .find(|&e| e.tag == format!("Þ{}", tag))
+                            .map(|e| e.form.to_string()),
+                        dat: entries
+                            .iter()
+                            .find(|&e| e.tag == format!("ÞG{}", tag))
+                            .map(|e| e.form.to_string()),
+                        gen: entries
+                            .iter()
+                            .find(|&e| e.tag == format!("E{}", tag))
+                            .map(|e| e.form.to_string()),
+                    })
+                }
+            }
+            (_, _) => None,
+        }
     }
 
     pub fn adjective(&self, root: &str) -> Option<AdjectiveEntry> {
@@ -807,24 +860,47 @@ læra;435046;so;alm;lærðist;OP-ÞGF-MM-VH-ÞT-1P-FT
 læra;435046;so;alm;lærðist;OP-ÞGF-MM-VH-ÞT-2P-ET
 læra;435046;so;alm;lærðist;OP-ÞGF-MM-VH-ÞT-2P-FT
 læra;435046;so;alm;lærðist;OP-ÞGF-MM-VH-ÞT-3P-ET
-læra;435046;so;alm;lærðist;OP-ÞGF-MM-VH-ÞT-3P-FT";
-
-    #[test]
-    pub fn loads_bin_data() {
-        let bin_data = BinData::load(TEST_DATA.as_bytes()).unwrap();
-
-        assert_eq!(4, bin_data.data.len());
-
-        assert!(bin_data.data.contains_key("aðalhellir"));
-        assert!(bin_data.data.contains_key("aðalhenda"));
-        assert!(bin_data.data.contains_key("fallegur"));
-        assert!(bin_data.data.contains_key("læra"));
-
-        assert_eq!(16, bin_data.data.get("aðalhellir").unwrap().len());
-        assert_eq!(18, bin_data.data.get("aðalhenda").unwrap().len());
-        assert_eq!(120, bin_data.data.get("fallegur").unwrap().len());
-        assert_eq!(128, bin_data.data.get("læra").unwrap().len());
-    }
+læra;435046;so;alm;lærðist;OP-ÞGF-MM-VH-ÞT-3P-FT
+ég;403780;pfn;alm;ég;NFET
+ég;403780;pfn;alm;mig;ÞFET
+ég;403780;pfn;alm;mér;ÞGFET
+ég;403780;pfn;alm;mín;EFET
+ég;403780;pfn;alm;við;NFFT
+ég;403780;pfn;alm;okkur;ÞFFT
+ég;403780;pfn;alm;okkur;ÞGFFT
+ég;403780;pfn;alm;okkar;EFFT
+þú;403782;pfn;alm;þú;NFET
+þú;403782;pfn;alm;þig;ÞFET
+þú;403782;pfn;alm;þér;ÞGFET
+þú;403782;pfn;alm;þín;EFET
+þú;403782;pfn;alm;þið;NFFT
+þú;403782;pfn;alm;ykkur;ÞFFT
+þú;403782;pfn;alm;ykkur;ÞGFFT
+þú;403782;pfn;alm;ykkar;EFFT
+hann;403784;pfn;alm;hann;NFET
+hann;403784;pfn;alm;hann;ÞFET
+hann;403784;pfn;alm;honum;ÞGFET
+hann;403784;pfn;alm;hans;EFET
+hann;403784;pfn;alm;þeir;NFFT
+hann;403784;pfn;alm;þá;ÞFFT
+hann;403784;pfn;alm;þeim;ÞGFFT
+hann;403784;pfn;alm;þeirra;EFFT
+hún;403785;pfn;alm;hún;NFET
+hún;403785;pfn;alm;hana;ÞFET
+hún;403785;pfn;alm;henni;ÞGFET
+hún;403785;pfn;alm;hennar;EFET
+hún;403785;pfn;alm;þær;NFFT
+hún;403785;pfn;alm;þær;ÞFFT
+hún;403785;pfn;alm;þeim;ÞGFFT
+hún;403785;pfn;alm;þeirra;EFFT
+það;403786;pfn;alm;það;NFET
+það;403786;pfn;alm;það;ÞFET
+það;403786;pfn;alm;því;ÞGFET
+það;403786;pfn;alm;þess;EFET
+það;403786;pfn;alm;þau;NFFT
+það;403786;pfn;alm;þau;ÞFFT
+það;403786;pfn;alm;þeim;ÞGFFT
+það;403786;pfn;alm;þeirra;EFFT";
 
     #[test]
     pub fn gets_noun_entry() {
@@ -938,5 +1014,70 @@ læra;435046;so;alm;lærðist;OP-ÞGF-MM-VH-ÞT-3P-FT";
         assert_eq!("lærðum", verb_entry.past_ind_first_pl.unwrap());
         assert_eq!("lærðuð", verb_entry.past_ind_second_pl.unwrap());
         assert_eq!("lærðu", verb_entry.past_ind_third_pl.unwrap());
+    }
+
+    #[test]
+    pub fn gets_pronoun_entries() {
+        let bin_data = BinData::load(TEST_DATA.as_bytes()).unwrap();
+
+        let e = bin_data.pronoun("ég").unwrap();
+        assert_eq!("ég", e.nom.unwrap());
+        assert_eq!("mig", e.acc.unwrap());
+        assert_eq!("mér", e.dat.unwrap());
+        assert_eq!("mín", e.gen.unwrap());
+
+        let e = bin_data.pronoun("þú").unwrap();
+        assert_eq!("þú", e.nom.unwrap());
+        assert_eq!("þig", e.acc.unwrap());
+        assert_eq!("þér", e.dat.unwrap());
+        assert_eq!("þín", e.gen.unwrap());
+
+        let e = bin_data.pronoun("hann").unwrap();
+        assert_eq!("hann", e.nom.unwrap());
+        assert_eq!("hann", e.acc.unwrap());
+        assert_eq!("honum", e.dat.unwrap());
+        assert_eq!("hans", e.gen.unwrap());
+
+        let e = bin_data.pronoun("hún").unwrap();
+        assert_eq!("hún", e.nom.unwrap());
+        assert_eq!("hana", e.acc.unwrap());
+        assert_eq!("henni", e.dat.unwrap());
+        assert_eq!("hennar", e.gen.unwrap());
+
+        let e = bin_data.pronoun("það").unwrap();
+        assert_eq!("það", e.nom.unwrap());
+        assert_eq!("það", e.acc.unwrap());
+        assert_eq!("því", e.dat.unwrap());
+        assert_eq!("þess", e.gen.unwrap());
+
+        let e = bin_data.pronoun("við").unwrap();
+        assert_eq!("við", e.nom.unwrap());
+        assert_eq!("okkur", e.acc.unwrap());
+        assert_eq!("okkur", e.dat.unwrap());
+        assert_eq!("okkar", e.gen.unwrap());
+
+        let e = bin_data.pronoun("þið").unwrap();
+        assert_eq!("þið", e.nom.unwrap());
+        assert_eq!("ykkur", e.acc.unwrap());
+        assert_eq!("ykkur", e.dat.unwrap());
+        assert_eq!("ykkar", e.gen.unwrap());
+
+        let e = bin_data.pronoun("þeir").unwrap();
+        assert_eq!("þeir", e.nom.unwrap());
+        assert_eq!("þá", e.acc.unwrap());
+        assert_eq!("þeim", e.dat.unwrap());
+        assert_eq!("þeirra", e.gen.unwrap());
+
+        let e = bin_data.pronoun("þær").unwrap();
+        assert_eq!("þær", e.nom.unwrap());
+        assert_eq!("þær", e.acc.unwrap());
+        assert_eq!("þeim", e.dat.unwrap());
+        assert_eq!("þeirra", e.gen.unwrap());
+
+        let e = bin_data.pronoun("þau").unwrap();
+        assert_eq!("þau", e.nom.unwrap());
+        assert_eq!("þau", e.acc.unwrap());
+        assert_eq!("þeim", e.dat.unwrap());
+        assert_eq!("þeirra", e.gen.unwrap());
     }
 }
