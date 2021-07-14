@@ -48,6 +48,7 @@ hægur	adjective	1. easy, convenient; 2. possible; 3. calm, quiet, slow
 jákvæður	adjective	positive, constructive, sympathetic, favorable
 kaldur	adjective	cold
 kátur	adjective	cheerful, merry, jolly
+kvefaður	adjective	suffering from a cold, sniffly
 kvíðinn	adjective	fearful, anxious, apprehensive
 latur	adjective	lazy
 leiðinlegur	adjective	1. dull, boring, tedious; 2. sad
@@ -69,6 +70,7 @@ rólegur	adjective	1. calm, quiet, tranquil; 2. slow
 saddur	adjective	full, replete
 sammála	adjective	in agreement
 sérstakur	adjective	1. separate; 2. particular; 3. special, unusual
+sjálfsagður	adjective	self-explanatory, obvious, self-evident
 skemmtilegur	adjective	1. amusing, funny; 2. entertaining; 3. interesting
 skýr	adjective	1. clear, distinct; 2. lucid, readily-intelligible; 3. sharp, quick, intelligent
 sorglegur	adjective	1. tragic, sad; 2. sad, distressed
@@ -118,9 +120,9 @@ saman	adverb	together
 sérstaklega	adverb	especially, unsusually
 sömuleiðis	adverb	likewise, same, ditto
 varlega	adverb	carefully, cautiously
+vonandi	adverb	hopefully
 þangað	adverb	there, over there
 örugglega	adverb	1. certainly, definitely; 2. with assurance, assuredly
-jæja	interjection	well
 aðalhlutverk	noun	main role (acting)
 afi	noun	grandfather, grandpa
 afmælisveisla	noun	birthday party
@@ -132,20 +134,26 @@ auglýsing	noun	advertisement
 á	noun	river, stream
 bakpoki	noun	backpack
 Bandaríkin	noun	The United States
+bátur	noun	boat, small craft
 belti	noun	1. belt; 2. zone; 3. caterpillar tread
 birta	noun	light, brightness
 bíll	noun	car, auto
 bíómynd	noun	film
 bíó	noun	movie theater, cinema
 bjór	noun	beer
+blað	noun	1. leaf; 2. newspaper, paper; 3. sheet of paper; 4. page
 blaðagrein	noun	newspaper article
+bolli	noun	cup
 borð	noun	1. table; 2. plank, board
 borg	noun	1. city, town; 2. castle; 3. rocky hill; 4. shelter
 bókmenntafræði	noun	literary studies, literature
 bók	noun	book
+brauð	noun	bread, loaf of bread
 bréf	noun	letter (mail)
 bróðir	noun	brother
+búð	noun	shop
 dagblað	noun	daily newspaper
+dagskrá	noun	program, agenda, order of the day
 dagur	noun	day
 dalur	noun	1. valley, dale; 2. dollar
 Danmörk	noun	Denmark
@@ -153,21 +161,27 @@ diskur	noun	1. plate; 2. disk/disc
 dót	noun	1. luggage, things; 2. toys; 3. rabble
 dvöl	noun	stay, stop
 eignarfall	noun	genitive, possessive case
+epli	noun	apple
 fangelsi	noun	prison
 farangur	noun	luggage, baggage
 ferðabúnaður	noun	travel equipment
 ferð	noun	1. trip, journey; 2. speed
+félag	noun	society, association, club, union
 fimmtudagur	noun	Thursday
+fiskur	noun	fish
+flatkaka	noun	Icelandic flatbread
 fjallganga	noun	mountain hike, mountaineering
 fjall	noun	mountain
 forritari	noun	computer programmer
 forrit	noun	1. computer program; 2. examplar
+foss	noun	waterfall
 fólk	noun	people, folk
 Frakkland	noun	France
 framtíð	noun	1. future; 2. future tense
 frásaga	noun	story
 frelsishetja	noun	freedom champion
 frétt	noun	1. news; 2. (pl.) news broadcast
+frost	noun	frost, icy weather
 fyrirlestur	noun	lecture
 fyrrasumar	noun	last summer
 föstudagur	noun	Friday
@@ -177,9 +191,12 @@ gaman	noun	fun, enjoyment
 gangstétt	noun	sidewalk
 gata	noun	street, way, path
 geisladiskur	noun	compact disc, CD
+gisting	noun	night's lodging
 greiða	noun	comb
 grein	noun	1. branch, bough; 2. subject, field; 3. article; 4. paragraph; 5. point
+gráða	noun	degree
 gönguferð	noun	walk, hike
+gönguleið	noun	path, trail
 handklæði	noun	towel
 handrit	noun	manuscript
 hangikjöt	noun	smoked meat (esp. lamb)	
@@ -189,8 +206,10 @@ hár	noun	hair
 hárþurrka	noun	hair dryer
 herbergi	noun	room
 hestur	noun	horse
+hiti	noun	heat, warmth
 hlutur	noun	1. thing, object; 2. part, share
 hlutverk	noun	1. task; 2. mission, role
+hnífur	noun	knife
 hótel	noun	hotel
 hreinleiki	noun	purity
 hughrif	noun	impression, (mental) influence
@@ -198,11 +217,14 @@ hús	noun	house, home
 hörkuvinna	noun	(extremely) hard work
 innsetning	noun	installation (as a work of art)
 íslenska	noun	Icelandic (language)
-kaffihús	noun	coffee house, cafe
+jakki	noun	jacket
+jógúrt	noun	yogurt
 kaffi	noun	coffee
+kaffihús	noun	coffee house, cafe
 kaka	noun	cake
 kennari	noun	teacher
 kirkja	noun	church
+kílómetri	noun	kilometer
 klukka	noun	clock
 kona	noun	woman
 kongur	noun	king
@@ -229,6 +251,7 @@ listmálari	noun	painter
 litur	noun	1. color; 2. dye, coloring; 3. crayon; 4. suit (in cards)
 líffræði	noun	biology
 líf	noun	life
+loft	noun	1. air; 2. sky
 lýsingarorð	noun	adjective
 lýsing	noun	1. lighting, illumination; 2. description
 lækur	noun	stream, brook
@@ -238,6 +261,7 @@ mappa	noun	folder, file
 matur	noun	food
 málverk	noun	painting
 mánudagur	noun	Monday
+meðlimur	noun	member
 meistari	noun	master, maestro (in music)
 menntaskóli	noun	high school, grammar school
 miðbær	noun	city center, downtown area
@@ -249,6 +273,7 @@ mynd	noun	1. shape, form; 2. photo, picture; 3. movie, film; 4. painting, pictur
 nafn	noun	name
 nafnorð	noun	noun, substantive
 nammi	noun	candy, sweets
+náttúra	noun	1. nature, natural life; 2. character, nature
 nefnifall	noun	nominative case
 nemandi	noun	student, pupil
 nóta	noun	1. (music) note; 2. bill; 3. receipt; 4. comment, note
@@ -261,9 +286,12 @@ pabbi	noun	dad, father
 persóna	noun	1. person; 2. personality; 3. character
 peysa	noun	1. sweater, jersey; 2. blouse
 piltur	noun	boy, young man
+plan	noun	1. open space, lot; 2. plan, intention; 3. level
 popp	noun	1. pop music; 2. popcorn
 pottur	noun	1. pot; 2. liter; 3. chamber pot; 4. pot, pool (of money); 5. (heitur pottur) hot pool
 pósthús	noun	post office
+rigning	noun	rain, rainy weather
+rok	noun	storm, heavy wind
 rós	noun	rose
 rúm	noun	1. bed; 2. area, space
 rúta	noun	1. coach, bus; 2. route
@@ -282,10 +310,13 @@ skinka	noun	ham, smoked pork
 skógur	noun	forest, woods
 skóli	noun	school
 skór	noun	shoe
+skyr	noun	Icelandic yogurt
 sonur	noun	son
+sól	noun	sun, sunny weather
 sólarolía	noun	sunscreen, suntan lotion
 sólbekkur	noun	1. sun chair; 2. window sill
 spjall	noun	conversation, chat
+spurning	noun	question
 steinn	noun	stone
 stelpa	noun	girl
 stjórnandi	noun	1. leader; 2. conductor; 3. (pl.) directors, the management
@@ -293,6 +324,7 @@ stjórnmálamaður	noun	politician
 stjórn	noun	1. leadership; 2. management; 3. administration
 stóll	noun	chair
 strákur	noun	boy
+stúlka	noun	girl
 stytta	noun	statue
 stærðfræði	noun	math, mathematics
 sumar	noun	summer
@@ -305,6 +337,7 @@ sundskýla	noun	swimming trunks
 sunnudagur	noun	Sunday
 súpa	noun	soup
 svefnpoki	noun	sleeping bag
+sveit	noun	1. district, region; 2. country, rural area; 3. team
 svæði	noun	area, zone
 systkini	noun	siblings
 söguþráður	noun	plot
@@ -314,8 +347,9 @@ taska	noun	1. suitcase; 2. bag, handbag
 te	noun	tea
 tími	noun	1. time; 2. hour
 torg	noun	(city) square
-tónlistarmaður	noun	1. musician; 2. composer
 tónlist	noun	music
+tónlistarmaður	noun	1. musician; 2. composer
+trefill	noun	scarf
 tromma	noun	drum
 tungumál	noun	language
 tækifæri	noun	opportunity
@@ -327,6 +361,7 @@ uppáhald	noun	pet, favorite
 upplýsing	noun	1. (pl.) information; 2. Enlightenment; 3. illumination, lighting
 upptaka	noun	recording
 vatn	noun	1. water; 2. lake
+veðurspá	noun	weather forecast
 vefsíða	noun	web page
 veitingahús	noun	restaurant
 veitingastaður	noun	restaurant
@@ -339,6 +374,7 @@ vika	noun	week
 vina	noun	girl friend
 vinur	noun	friend
 vitleysa	noun	1. foolishness, folly; 2. nonsense, rubbish
+von	noun	1. hope; 2. expectation
 vor	noun	spring
 þágufall	noun	dative case
 þáttur	noun	1. part, factor; 2. act (of a play); 3. program (TV); 4. story, narrative
@@ -354,6 +390,7 @@ einn	number	one
 tveir	number	two
 þrír	number	three
 fjórir	number	four
+að sjálfsögðu!	phrase	obviously!
 að taka þátt í ...	phrase	to take part in ...
 að telja upp að tíu	phrase	To count up to ten
 alls konar ...	phrase	all kinds of ...
@@ -365,6 +402,7 @@ ekkert mál	phrase	no problem
 ekki alveg	phrase	not quite
 ekki satt	phrase	isn't that right?
 er hægt að ...	phrase	It's possible to ...
+eiga von á ...	phrase	to expect ...
 ég er ósammála	phrase	I don't agree
 ég ætla að fá ...	phrase	I'd like to have ...
 gaman að hitta þér	phrase	Nice to meet you
@@ -375,11 +413,15 @@ hvað er klukkan?	phrase	What time is it?
 hvað eru margar ...	phrase	How many ... are there
 hvað finnst þér ...	phrase	What do you think ...
 hvers vegna	phrase	why?
+jæja	phrase	well!
 klukkan er ...	phrase	The time is ...
 mér dettur í hug	phrase	it occurs to me
 nú förum við af stað	phrase	Let's get going, let's take off
 passar þér	phrase	be careful, watch yourself
 til dæmis	phrase	for example
+það er tíu stiga hiti	phrase	It is 10 degrees
+það er tíu stiga frost	phrase	It is -10 degrees
+það er núll gráður	phrase	It is 0 degrees
 ég	pronoun	I, me
 þú	pronoun	you (sg.)
 hann	pronoun	he, him, his
@@ -394,6 +436,7 @@ athuga	verb	1. to look at, look into; 2. observe, notice
 bjóða	verb	1. to offer; 2. to invite, ask; 3. to command
 borða	verb	1. eat; 2. dine
 búa	verb	1. to live, reside; 2. to farm; 3. to prepare
+byrja	verb	to begin, start
 deyja	verb	to die
 drekka	verb	to drink
 drífa	verb	1. to drive (something); 2. To get going, hurry up
@@ -405,41 +448,53 @@ fræða	verb	to instruct, inform
 fylgja	verb	1. to guide, accompany, take; 2. to support, follow
 ganga	verb	1. to walk, go on foot; 2. to move, run, go; 3. to go around, be passed on
 gista	verb	to stay the night
+gleyma	verb	to forget
 hafa	verb	1. to have; 2. to hold, have; 3. to keep
 hefja	verb	1. begin, commence; 2. raise, lift
 heita	verb	to be called, named
 hjálpa	verb	to help
 hlakka	verb	to look forward to (hlakka til)
+hljóta	verb	1. to get, receive; 2. must, have to
 horfa	verb	1. to look at, watch, view; 2. to face (a direction)
+hugsa	verb	1. to think; 2. to believe, guess
 kaupa	verb	to buy, purchase
 keyra	verb	to drive (a car)
 koma	verb	to come
 kosta	verb	to cost
 kynna	verb	1. to introduce, get to know; 2. to make known, publicize
 labba	verb	to walk slowly, stroll
+láta	verb	1. to let, make, have; 2. to put
 leika	verb	1. to play; 2. to act
 leita	verb	to search, look for
 læra	verb	to learn, study
 mála	verb	to paint
 muna	verb	to remember
 nema	verb	1. to study, learn; 2. to perceive
-nota	verb	use, apply
+nota	verb	to use, apply
+panta	verb	to order (e.g. at a restaurant)
 passa	verb	1. to look after; 2. to fit
+prófa	verb	1. to try; 2. to test out; 3. to hold an exam
+pæla	verb	1. to poke about, think about, study; 2. hoe, dig up soil
 reykja	verb	to smoke
+rétta	verb	1. to give, hand over, pass; 2. straighten; 3. extend, stretch out
 segja	verb	to say, to tell
 selja	verb	to sell
 semja	verb	to compose, write (music)
 senda	verb	to send
+setja	verb	1. to put, place; 2. decide, fix, determine
 sjá	verb	to see
 skapa	verb	to create
 skilja	verb	to understand
 skoða	verb	1. to observe, take a look at; 2. to examine, study, scrutinize; 3. to consider, study
 skrifa	verb	to write
+smakka	verb	to taste
 spila	verb	to play (cards, instrument, etc.)
+spá	verb	to predict, forecast
 svara	verb	to answer, respond, reply
 synda	verb	to swim
 syngja	verb	to sing
 sýna	verb	1. to show; 2. to exhibit
+sækja	verb	1. get, fetch; 2. attack, be on offensive; 3. attend
 taka	verb	1. to take; 2. to seize, capture; 3. to get, obtain; 4. to understand; 5. to accept
 tala	verb	to talk, speak
 telja	verb	to count
@@ -450,6 +505,7 @@ vilja	verb	to want, wish, will, desire
 vinna	verb	1. to work; 2. to perform; 3. to work on; 4. to win
 vita	verb	1. to know; 2. to face (a direction)
 vona	verb	to hope
+þola	verb	1. to stand, withstand, bear; 2. tolerate, stand, put up with, bear
 þurfa	verb	1. need, require; 2. have to
 þýða	verb	1. to mean, signify; 2. to translate; 3. to be of use
 ætla	verb	1. to intend, plan; 2. to be about to do something; 3. to think, guess, believe
