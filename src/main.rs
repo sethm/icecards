@@ -27,7 +27,7 @@ const PRONOUN_MODEL_ID: usize = 1625673414050;
 const DECK_ID: usize = 1625673415000;
 
 const CSS: &str = r#".card {
-  font-family: arial;
+  font-family: "Times New Roman", Times, serif;
   font-size: 20px;
   text-align: center;
   color: black;
@@ -46,8 +46,12 @@ td {
 .wclass {
   color: #009900;
   font-weight: bold;
+  font-style: italic;
 }
 .definition {
+  border: 1px solid black;
+  padding: 12px;
+  background: #eee;
   font-size: 110%;
   font-weight: bold;
   color: #000099;
@@ -79,13 +83,10 @@ td {
 }"#;
 
 const NOUN_TMPL: &str = r#"{{FrontSide}}
-<hr id="tt"/>
 <p class="wclass">Noun — {{Gender}}</p>
-<hr id="definition"/>
 <p class="definition">
  {{Definition}}
 </p>
-<hr id="forms"/>
 <h3>Indefinite</h3>
 <table>
  <tr>
@@ -144,11 +145,8 @@ const NOUN_TMPL: &str = r#"{{FrontSide}}
 </table>"#;
 
 const ADJ_TMPL: &str = r#"{{FrontSide}}
-<hr id="tt"/>
 <p class="wclass">Adjective</p>
-<hr id="definition"/>
 <p class="definition">{{Definition}}</p>
-<hr id="forms"/>
 <h3>Singular</h3>
 <table>
  <tr>
@@ -217,11 +215,8 @@ const ADJ_TMPL: &str = r#"{{FrontSide}}
 </table>"#;
 
 const VERB_TMPL: &str = r#"{{FrontSide}}
-<hr id="tt"/>
 <p class="wclass">Verb</p>
-<hr id="definition"/>
 <p class="definition">{{Definition}}</p>
-<hr id="forms"/>
 <h3>Present Indicative</h3>
 <table>
  <tr>
@@ -290,23 +285,16 @@ const VERB_TMPL: &str = r#"{{FrontSide}}
 </table>"#;
 
 const ADVERB_TMPL: &str = r#"{{FrontSide}}
-<hr id="tt"/>
 <p class="wclass">Phrase</p>
-<hr id="definition"/>
 <p class="definition">{{Definition}}</p>"#;
 
 const PHRASE_TMPL: &str = r#"{{FrontSide}}
-<hr id="tt"/>
 <p class="wclass">Phrase</p>
-<hr id="definition"/>
 <p class="definition">{{Definition}}</p>"#;
 
 const PRONOUN_TMPL: &str = r#"{{FrontSide}}
-<hr id="tt"/>
 <p class="wclass">Pronoun</p>
-<hr id="definition"/>
 <p class="definition">{{Definition}}</p>
-<hr id="forms"/>
 <table>
  <tr>
   <th class="acl">nom.</th>
