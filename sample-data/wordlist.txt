@@ -7,6 +7,7 @@ auðveldur	adjective	easy, simple
 ánægður	adjective	pleased, satisfied, content
 ánægjulegur	adjective	enjoyable, pleasant, delightful
 bjartur	adjective	bright, clear, shining
+bjartsýnn	adjective	optimistic
 blár	adjective	1. blue; 2. unadulterated, pure
 bleikur	adjective	pink, pale
 brúnn	adjective	brown
@@ -39,6 +40,7 @@ heimsfrægur	adjective	world-famous
 heimskur	adjective	stupid
 heitur	adjective	hot, warm
 hlýr	adjective	warm
+hollur	adjective	wholesome, healthy
 hreinn	adjective	1. clean; 2. pure; 3. plain
 hress	adjective	1. fit, well; 2. in high spirits, in good form
 hvítur	adjective	white
@@ -48,6 +50,7 @@ hægur	adjective	1. easy, convenient; 2. possible; 3. calm, quiet, slow
 jákvæður	adjective	positive, constructive, sympathetic, favorable
 kaldur	adjective	cold
 kátur	adjective	cheerful, merry, jolly
+klár	adjective	1. clever, sharp, bright; 2. ready, prepared
 kvefaður	adjective	suffering from a cold, sniffly
 kvíðinn	adjective	fearful, anxious, apprehensive
 latur	adjective	lazy
@@ -57,6 +60,7 @@ lifandi	adjective	alive
 lítill	adjective	1. small, short; 2. little, insignificant
 ljótur	adjective	1. ugly; 2. bad
 margur	adjective	1. many, a lot; 2. much, many things
+nákvæmur	adjective	1. exact, precise; 2. thorough; 3. careful
 neikvæður	adjective	negative
 nógur	adjective	enough, sufficient, satisfactory
 nýlegur	adjective	almost new, recent
@@ -78,6 +82,7 @@ spennandi	adjective	thrilling, exciting
 spenntur	adjective	1. expectant, eager, anxious; 2. tense, nervous, keyed up
 stór	adjective	1. large, big; 2. tall; 3. great; 4. important
 stórkostlegur	adjective	great, magnificent, splendid
+stöðugur	adjective	1. constant, incessant; 2. steadfast
 svangur	adjective	hungry
 svartur	adjective	black
 svolítill	adjective	1. small, little; 2. a little
@@ -86,6 +91,8 @@ ungur	adjective	young
 vinsæll	adjective	popular
 vondur	adjective	1. bad, evil; 2. angry, mad; 3. poor, bad, in bad shape
 yndislegur	adjective	wonderful, marvellous
+þægilegur	adjective	1. comfortable; 2. pleasant, likeable
+þolinmóður	adjective	patient
 þreyttur	adjective	tired, exhausted, fatigued
 þröngur	adjective	1. crowded; 2. narrow; 3. difficult
 þunglyndur	adjective	sad, melancholy, depressed
@@ -118,6 +125,7 @@ oft	adverb	often
 rosalega	adverb	fantastically, tremendously
 saman	adverb	together
 sérstaklega	adverb	especially, unsusually
+stöðugt	adverb	constantly, permanently, always
 sömuleiðis	adverb	likewise, same, ditto
 varlega	adverb	carefully, cautiously
 vonandi	adverb	hopefully
@@ -161,6 +169,7 @@ diskur	noun	1. plate; 2. disk/disc
 dót	noun	1. luggage, things; 2. toys; 3. rabble
 dvöl	noun	stay, stop
 eignarfall	noun	genitive, possessive case
+engill	noun	angel
 epli	noun	apple
 fangelsi	noun	prison
 farangur	noun	luggage, baggage
@@ -237,6 +246,7 @@ kvikmynd	noun	film, movie
 kvöldmatur	noun	supper, dinner
 kyn	noun	gender, sex
 kyrrð	noun	1. silence, stillness; 2. peace and quiet
+lag	noun	1. tune, melody; 2. layer; 3. way, method
 land	noun	1. land, earth; 2. country
 laugardagur	noun	Saturday
 leiðsögumaður	noun	guide, travel guide
@@ -281,8 +291,10 @@ nótt	noun	night
 númer	noun	number
 orðaforði	noun	vocabulary, lexicon
 orð	noun	word
+orka	noun	power, energy
 ostur	noun	cheese
 pabbi	noun	dad, father
+pása	noun	1. break; 2.  interval
 persóna	noun	1. person; 2. personality; 3. character
 peysa	noun	1. sweater, jersey; 2. blouse
 piltur	noun	boy, young man
@@ -413,15 +425,20 @@ hvað er klukkan?	phrase	What time is it?
 hvað eru margar ...	phrase	How many ... are there
 hvað finnst þér ...	phrase	What do you think ...
 hvers vegna	phrase	why?
+hvernig líður þér?	phrase	How do you feel?
 jæja	phrase	well!
 klukkan er ...	phrase	The time is ...
+mig langar í ...	phrase	I want ...
 mér dettur í hug	phrase	it occurs to me
+mér líður illa	phrase	I feel bad
+mér líður vel	phrase	I feel good
 nú förum við af stað	phrase	Let's get going, let's take off
 passar þér	phrase	be careful, watch yourself
 til dæmis	phrase	for example
 það er tíu stiga hiti	phrase	It is 10 degrees
 það er tíu stiga frost	phrase	It is -10 degrees
 það er núll gráður	phrase	It is 0 degrees
+þetta eru búnar að vera ...	phrase	These have been ...
 ég	pronoun	I, me
 þú	pronoun	you (sg.)
 hann	pronoun	he, him, his
@@ -473,6 +490,7 @@ nema	verb	1. to study, learn; 2. to perceive
 nota	verb	to use, apply
 panta	verb	to order (e.g. at a restaurant)
 passa	verb	1. to look after; 2. to fit
+pirra	verb	to irritate
 prófa	verb	1. to try; 2. to test out; 3. to hold an exam
 pæla	verb	1. to poke about, think about, study; 2. hoe, dig up soil
 reykja	verb	to smoke
@@ -499,12 +517,14 @@ taka	verb	1. to take; 2. to seize, capture; 3. to get, obtain; 4. to understand;
 tala	verb	to talk, speak
 telja	verb	to count
 undirbúa	verb	to prepare
+vanda	verb	to do carefully
 vera	verb	to be
 verða	verb	1. to become; 2. have to, must; 3. will
 vilja	verb	to want, wish, will, desire
 vinna	verb	1. to work; 2. to perform; 3. to work on; 4. to win
 vita	verb	1. to know; 2. to face (a direction)
 vona	verb	to hope
+þekkja	verb	1. to know, be familiar with; 2. to recognize, know
 þola	verb	1. to stand, withstand, bear; 2. tolerate, stand, put up with, bear
 þurfa	verb	1. need, require; 2. have to
 þýða	verb	1. to mean, signify; 2. to translate; 3. to be of use
