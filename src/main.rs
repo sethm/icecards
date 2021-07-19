@@ -27,7 +27,7 @@ const PRONOUN_MODEL_ID: usize = 1625673414050;
 const DECK_ID: usize = 1625673415000;
 
 const CSS: &str = r#".card {
-  font-family: "Times New Roman", Times, serif;
+  font-family: Helvetica, Arial, sans-serif;
   font-size: 20px;
   text-align: center;
   color: black;
@@ -43,6 +43,10 @@ td {
   border: 1px solid #ccc;
   padding: 6px;
 }
+th {
+  font-style: italic;
+  padding: 8px;
+}
 .wclass {
   color: #009900;
   font-weight: bold;
@@ -52,7 +56,7 @@ td {
   border: 1px solid black;
   padding: 12px;
   background: #eee;
-  font-size: 110%;
+  font-size: 120%;
   font-weight: bold;
   color: #000099;
 }
@@ -64,24 +68,32 @@ td {
 .ncl {
   width: 12%;
 }
-.nfm {
+.acl {
+  width: 13%;
+}
+.nfh,.nfm {
   width: 44%;
+}
+.nfm {
   font-weight: bold;
+  font-size: 120%;
 }
 .pfm {
   width: 88%;
   font-weight: bold;
+  font-size: 120%;
 }
-.acl {
-  width: 13%;
+.afh,.afm {
+  width: 29%;
 }
 .afm {
-  width: 29%;
   font-weight: bold;
+  font-size: 120%;
 }
 .vfm {
   width: 50%;
   font-weight: bold;
+  font-size: 120%;
 }"#;
 
 const NOUN_TMPL: &str = r#"{{FrontSide}}
@@ -93,8 +105,8 @@ const NOUN_TMPL: &str = r#"{{FrontSide}}
 <table>
  <tr>
   <th class="ncl"></th>
-  <th class="nfm">Singular</th>
-  <th class="nfm">Plural</th>
+  <th class="nfh">Singular</th>
+  <th class="nfh">Plural</th>
  </tr>
  <tr>
   <th class="ncl">nom.</th>
@@ -121,8 +133,8 @@ const NOUN_TMPL: &str = r#"{{FrontSide}}
 <table>
  <tr>
   <th class="ncl"></th>
-  <th class="nfm">Singular</th>
-  <th class="nfm">Plural</th>
+  <th class="nfh">Singular</th>
+  <th class="nfh">Plural</th>
  </tr>
  <tr>
   <th class="ncl">nom.</th>
@@ -153,9 +165,9 @@ const ADJ_TMPL: &str = r#"{{FrontSide}}
 <table>
  <tr>
   <th class="acl"></th>
-  <th class="afm">masc.</th>
-  <th class="afm">fem.</th>
-  <th class="afm">neut.</th>
+  <th class="afh">masc.</th>
+  <th class="afh">fem.</th>
+  <th class="afh">neut.</th>
  </tr>
  <tr>
   <th class="acl">nom.</th>
@@ -186,9 +198,9 @@ const ADJ_TMPL: &str = r#"{{FrontSide}}
 <table>
  <tr>
   <th class="acl"></th>
-  <th class="afm">masc.</th>
-  <th class="afm">fem.</th>
-  <th class="afm">neut.</th>
+  <th class="afh">masc.</th>
+  <th class="afh">fem.</th>
+  <th class="afh">neut.</th>
  </tr>
  <tr>
   <th class="acl">nom.</th>
@@ -474,37 +486,22 @@ fn generate_deck(
 
     for (key, definition) in &dictionary.entries {
         let root = &key.root;
-        match key.category {
-            Category::Noun => {
-                if let Some(note) = noun(&root, bin_data, definition, &noun_model) {
-                    deck.add_note(note)
-                }
-            }
-            Category::Adjective => {
-                if let Some(note) = adjective(&root, bin_data, definition, &adjective_model) {
-                    deck.add_note(note)
-                }
-            }
-            Category::Verb => {
-                if let Some(note) = verb(&root, bin_data, definition, &verb_model) {
-                    deck.add_note(note)
-                }
-            }
-            Category::Adverb => {
-                if let Some(note) = simple_note(&root, definition, &adverb_model) {
-                    deck.add_note(note)
-                }
-            }
-            Category::Phrase => {
-                if let Some(note) = simple_note(&root, definition, &phrase_model) {
-                    deck.add_note(note)
-                }
-            }
-            Category::Pronoun => {
-                if let Some(note) = pronoun(&root, bin_data, definition, &pronoun_model) {
-                    deck.add_note(note)
-                }
-            }
+
+        let note = match key.category {
+            Category::Noun => noun(&root, bin_data, definition, &noun_model),
+            Category::Adjective => adjective(&root, bin_data, definition, &adjective_model),
+            Category::Verb => verb(&root, bin_data, definition, &verb_model),
+            Category::Adverb => simple_note(&root, definition, &adverb_model),
+            Category::Phrase => simple_note(&root, definition, &phrase_model),
+            Category::Pronoun => pronoun(&root, bin_data, definition, &pronoun_model),
+        };
+
+        match note {
+            Some(note) => deck.add_note(note),
+            None => println!(
+                "WARNING: No entry found for root {}, category {:?}. Skipping.",
+                &root, key.category
+            ),
         }
     }
 
