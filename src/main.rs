@@ -59,27 +59,29 @@ td {
 .vp {
   color: #999;
   font-style: italic;
-}
-.vf {
-  font-weight: bold;
+  font-weight: normal;
 }
 .ncl {
   width: 12%;
 }
 .nfm {
   width: 44%;
+  font-weight: bold;
 }
 .pfm {
   width: 88%;
+  font-weight: bold;
 }
 .acl {
   width: 13%;
 }
 .afm {
   width: 29%;
+  font-weight: bold;
 }
 .vfm {
   width: 50%;
+  font-weight: bold;
 }"#;
 
 const NOUN_TMPL: &str = r#"{{FrontSide}}
@@ -96,23 +98,23 @@ const NOUN_TMPL: &str = r#"{{FrontSide}}
  </tr>
  <tr>
   <th class="ncl">nom.</th>
-  <td class="nfm">{{Nominative Singular}}</td>
-  <td class="nfm">{{Nominative Plural}}</td>
+  <td class="nfm"><span class="vp">hér er</span> {{Nominative Singular}}</td>
+  <td class="nfm"><span class="vp">hér eru</span> {{Nominative Plural}}</td>
  </tr>
  <tr>
   <th class="ncl">acc.</th>
-  <td class="nfm">{{Accusative Singular}}</td>
-  <td class="nfm">{{Accusative Plural}}</td>
+  <td class="nfm"><span class="vp">um</span> {{Accusative Singular}}</td>
+  <td class="nfm"><span class="vp">um</span> {{Accusative Plural}}</td>
  </tr>
  <tr>
   <th class="ncl">dat.</th>
-  <td class="nfm">{{Dative Singular}}</td>
-  <td class="nfm">{{Dative Plural}}</td>
+  <td class="nfm"><span class="vp">frá</span> {{Dative Singular}}</td>
+  <td class="nfm"><span class="vp">frá</span> {{Dative Plural}}</td>
  </tr>
  <tr>
   <th class="ncl">gen.</th>
-  <td class="nfm">{{Genitive Singular}}</td>
-  <td class="nfm">{{Genitive Plural}}</td>
+  <td class="nfm"><span class="vp">til</span> {{Genitive Singular}}</td>
+  <td class="nfm"><span class="vp">til</span> {{Genitive Plural}}</td>
  </tr>
 </table>
 <h3>Definite</h3>
@@ -124,23 +126,23 @@ const NOUN_TMPL: &str = r#"{{FrontSide}}
  </tr>
  <tr>
   <th class="ncl">nom.</th>
-  <td class="nfm">{{Nominative Singular Definite}}</td>
-  <td class="nfm">{{Nominative Plural Definite}}</td>
+  <td class="nfm"><span class="vp">hér er</span> {{Nominative Singular Definite}}</td>
+  <td class="nfm"><span class="vp">hér eru</span> {{Nominative Plural Definite}}</td>
  </tr>
  <tr>
   <th class="ncl">acc.</th>
-  <td class="nfm">{{Accusative Singular Definite}}</td>
-  <td class="nfm">{{Accusative Plural Definite}}</td>
+  <td class="nfm"><span class="vp">um</span> {{Accusative Singular Definite}}</td>
+  <td class="nfm"><span class="vp">um</span> {{Accusative Plural Definite}}</td>
  </tr>
  <tr>
   <th class="ncl">dat.</th>
-  <td class="nfm">{{Dative Singular Definite}}</td>
-  <td class="nfm">{{Dative Plural Definite}}</td>
+  <td class="nfm"><span class="vp">frá</span> {{Dative Singular Definite}}</td>
+  <td class="nfm"><span class="vp">frá</span> {{Dative Plural Definite}}</td>
  </tr>
  <tr>
   <th class="ncl">gen.</th>
-  <td class="nfm">{{Genitive Singular Definite}}</td>
-  <td class="nfm">{{Genitive Plural Definite}}</td>
+  <td class="nfm"><span class="vp">til</span> {{Genitive Singular Definite}}</td>
+  <td class="nfm"><span class="vp">til</span> {{Genitive Plural Definite}}</td>
  </tr>
 </table>"#;
 
@@ -221,32 +223,26 @@ const VERB_TMPL: &str = r#"{{FrontSide}}
 <table>
  <tr>
   <td class="vfm">
-   <span class="vp">ég</span>
-   <span class="vf">{{Present 1st Singular}}</span>
+   <span class="vp">ég</span> {{Present 1st Singular}}
   </td>
   <td class="vfm">
-   <span class="vp">við</span> 
-   <span class="vf">{{Present 1st Plural}}</span>
+   <span class="vp">við</span> {{Present 1st Plural}}
   </td>
  </tr>
  <tr>
   <td class="vfm">
-   <span class="vp">þú</span>
-   <span class="vf">{{Present 2nd Singular}}</span>
+   <span class="vp">þú</span> {{Present 2nd Singular}}
   </td>
   <td class="vfm">
-   <span class="vp">þið</span>
-   <span class="vf">{{Present 2nd Plural}}</span>
+   <span class="vp">þið</span> {{Present 2nd Plural}}
   </td>
  </tr>
  <tr>
   <td class="vfm">
-   <span class="vp">hann/hún/það</span>
-   <span class="vf">{{Present 3rd Singular}}</span>
+   <span class="vp">hann/hún/það</span> {{Present 3rd Singular}}
   </td>
   <td class="vfm">
-   <span class="vp">þeir/þær/þau</span>
-   <span class="vf">{{Present 3rd Plural}}</span>
+   <span class="vp">þeir/þær/þau</span> {{Present 3rd Plural}}
   </td>
  </tr>
 </table>
@@ -254,32 +250,26 @@ const VERB_TMPL: &str = r#"{{FrontSide}}
 <table>
  <tr>
   <td class="vfm">
-   <span class="vp">ég</span>
-   <span class="vf">{{Past 1st Singular}}</span>
+   <span class="vp">ég</span> {{Past 1st Singular}}
   </td>
   <td class="vfm">
-   <span class="vp">við</span>
-   <span class="vf">{{Past 1st Plural}}</span>
+   <span class="vp">við</span> {{Past 1st Plural}}
   </td>
  </tr>
  <tr>
   <td class="vfm">
-   <span class="vp">þú</span>
-   <span class="vf">{{Past 2nd Singular}}</span>
+   <span class="vp">þú</span> {{Past 2nd Singular}}
   </td>
   <td class="vfm">
-   <span class="vp">þið</span>
-   <span class="vf">{{Past 2nd Plural}}</span>
+   <span class="vp">þið</span> {{Past 2nd Plural}}
   </td>
  </tr>
  <tr>
   <td class="vfm">
-   <span class="vp">hann/hún/það</span>
-   <span class="vf">{{Past 3rd Singular}}</span>
+   <span class="vp">hann/hún/það</span> {{Past 3rd Singular}}
   </td>
   <td class="vfm">
-   <span class="vp">þeir/þær/þau</span>
-   <span class="vf">{{Past 3rd Plural}}</span>
+   <span class="vp">þeir/þær/þau</span> {{Past 3rd Plural}}
   </td>
  </tr>
 </table>"#;
