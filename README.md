@@ -18,7 +18,7 @@ on initial run.
 ## Usage
 
     USAGE:
-        is-anki-gen [OPTIONS] <wordlist>
+        icecards [OPTIONS] <wordlist>
     
     FLAGS:
         -h, --help       Prints help information
@@ -50,7 +50,12 @@ tab-separated. For example:
 The categories *noun*, *adjective*, *verb*, *pronoun*, and *phrase* are
 currently supported.
 
+# Sample Data
+
 An example input file can be found in the **sample-data** directory.
+
+This vocabulary list was compiled from the *Icelandic Online 1* course
+available at [https://icelandiconline.com/](https://icelandiconline.com/).
 
 # Links
 

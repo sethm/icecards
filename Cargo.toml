@@ -1,5 +1,5 @@
 [package]
-name = "is-anki-gen"
+name = "icecards"
 version = "0.1.0"
 authors = ["Seth Morabito <web@loomcom.com>"]
 edition = "2018"

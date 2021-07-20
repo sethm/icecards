@@ -940,7 +940,7 @@ async fn ensure_bin_data_exists(config: &AppConfig) -> Result<(), ProgramError> 
 #[tokio::main]
 async fn main() -> Result<(), ProgramError> {
     // Establish directories for holding state
-    match ProjectDirs::from("com", "loomcom", "is-anki-gen") {
+    match ProjectDirs::from("com", "loomcom", "icecards") {
         Some(project_dirs) => {
             let config = app_config(&project_dirs);
 
