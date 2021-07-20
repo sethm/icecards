@@ -47,8 +47,15 @@ tab-separated. For example:
     læra     verb        to learn, study
     tala     verb        to talk, speak
 
-The categories *noun*, *adjective*, *verb*, *pronoun*, and *phrase* are
-currently supported.
+The following categories are supported:
+
+  - `noun`
+  - `adjective`
+  - `verb`
+  - `pronoun`
+  - `indefinite_pronoun`
+  - `phrase`
+  - `number`
 
 # Sample Data
 
