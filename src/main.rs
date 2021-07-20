@@ -25,6 +25,7 @@ const ADVERB_MODEL_ID: usize = 1625673414030;
 const PHRASE_MODEL_ID: usize = 1625673414040;
 const PRONOUN_MODEL_ID: usize = 1625673414050;
 const INDEFINITE_PRONOUN_MODEL_ID: usize = 1625673414060;
+const NUMBER_MODEL_ID: usize = 1625673414070;
 const DECK_ID: usize = 1625673415000;
 
 const CSS: &str = r#".card {
@@ -159,6 +160,45 @@ const NOUN_TMPL: &str = r#"{{FrontSide}}
  </tr>
 </table>"#;
 
+const NUMBER_TMPL: &str = r#"{{FrontSide}}
+<p class="wclass">Number</p>
+<p class="definition">{{Definition}}</p>
+<table>
+ <tr>
+  <th class="acl"></th>
+  <th class="afh">masc.</th>
+  <th class="afh">fem.</th>
+  <th class="afh">neut.</th>
+ </tr>
+ <tr>
+  <th class="acl">nom.</th>
+  <td class="afm">{{Masculine Nominative}}</td>
+  <td class="afm">{{Feminine Nominative}}</td>
+  <td class="afm">{{Neuter Nominative}}</td>
+ </tr>
+ <tr>
+  <th class="acl">acc.</th>
+  <td class="afm">{{Masculine Accusative}}</td>
+  <td class="afm">{{Feminine Accusative}}</td>
+  <td class="afm">{{Neuter Accusative}}</td>
+ </tr>
+ <tr>
+  <th class="acl">dat.</th>
+  <td class="afm">{{Masculine Dative}}</td>
+  <td class="afm">{{Feminine Dative}}</td>
+  <td class="afm">{{Neuter Dative}}</td>
+ </tr>
+ <tr>
+  <th class="acl">gen.</th>
+  <td class="afm">{{Masculine Genitive}}</td>
+  <td class="afm">{{Feminine Genitive}}</td>
+  <td class="afm">{{Neuter Genitive}}</td>
+ </tr>
+</table>"#;
+
+// This template is used by both Adjectives and Indefinite Pronouns,
+// therefore "Word Class" is passed in as a field, in contrast to
+// other templates.
 const ADJ_TMPL: &str = r#"{{FrontSide}}
 <p class="wclass">{{Word Class}}</p>
 <p class="definition">{{Definition}}</p>
@@ -288,7 +328,7 @@ const VERB_TMPL: &str = r#"{{FrontSide}}
 </table>"#;
 
 const ADVERB_TMPL: &str = r#"{{FrontSide}}
-<p class="wclass">Phrase</p>
+<p class="wclass">Adverb</p>
 <p class="definition">{{Definition}}</p>"#;
 
 const PHRASE_TMPL: &str = r#"{{FrontSide}}
@@ -340,8 +380,8 @@ pub enum ProgramError {
 fn common_fields() -> Vec<Field> {
     vec![
         Field::new("Root"),
-        Field::new("Word Class"),
         Field::new("Definition"),
+        Field::new("Word Class"),
         Field::new("Masculine Singular Nominative"),
         Field::new("Feminine Singular Nominative"),
         Field::new("Neuter Singular Nominative"),
@@ -388,6 +428,33 @@ fn generate_deck(
         None,
     );
 
+    let number_model = Model::new_with_options(
+        NUMBER_MODEL_ID,
+        "Icelandic Numeral",
+        vec![
+            Field::new("Root"),
+            Field::new("Definition"),
+            Field::new("Masculine Nominative"),
+            Field::new("Masculine Accusative"),
+            Field::new("Masculine Dative"),
+            Field::new("Masculine Genitive"),
+            Field::new("Feminine Nominative"),
+            Field::new("Feminine Accusative"),
+            Field::new("Feminine Dative"),
+            Field::new("Feminine Genitive"),
+            Field::new("Neuter Nominative"),
+            Field::new("Neuter Accusative"),
+            Field::new("Neuter Dative"),
+            Field::new("Neuter Genitive"),
+        ],
+        vec![Template::new("Icelandic Numeral").qfmt("<h1>{{Root}}</h1>").afmt(NUMBER_TMPL)],
+        Some(CSS),
+        None,
+        None,
+        None,
+        None,
+    );
+
     let indef_pronoun_model = Model::new_with_options(
         INDEFINITE_PRONOUN_MODEL_ID,
         "Icelandic Indefinite Pronoun",
@@ -407,8 +474,8 @@ fn generate_deck(
         "Icelandic Noun",
         vec![
             Field::new("Root"),
-            Field::new("Gender"),
             Field::new("Definition"),
+            Field::new("Gender"),
             Field::new("Nominative Singular"),
             Field::new("Nominative Singular Definite"),
             Field::new("Accusative Singular"),
@@ -517,6 +584,7 @@ fn generate_deck(
             Category::IndefinitePronoun => {
                 indefinite_pronoun(&root, bin_data, definition, &indef_pronoun_model)
             }
+            Category::Number => number(&root, bin_data, definition, &number_model),
         };
 
         match note {
@@ -531,6 +599,34 @@ fn generate_deck(
     Ok(deck)
 }
 
+fn number(root: &str, bin_data: &BinData, definition: &str, model: &Model) -> Option<Note> {
+    match bin_data.number(root) {
+        Some(entry) => Some(
+            Note::new(
+                model.clone(),
+                vec![
+                    root,
+                    definition,
+                    &entry.masc_nom.unwrap_or_else(|| "—".to_string()),
+                    &entry.masc_acc.unwrap_or_else(|| "—".to_string()),
+                    &entry.masc_dat.unwrap_or_else(|| "—".to_string()),
+                    &entry.masc_gen.unwrap_or_else(|| "—".to_string()),
+                    &entry.fem_nom.unwrap_or_else(|| "—".to_string()),
+                    &entry.fem_acc.unwrap_or_else(|| "—".to_string()),
+                    &entry.fem_dat.unwrap_or_else(|| "—".to_string()),
+                    &entry.fem_gen.unwrap_or_else(|| "—".to_string()),
+                    &entry.neut_nom.unwrap_or_else(|| "—".to_string()),
+                    &entry.neut_acc.unwrap_or_else(|| "—".to_string()),
+                    &entry.neut_dat.unwrap_or_else(|| "—".to_string()),
+                    &entry.neut_gen.unwrap_or_else(|| "—".to_string()),
+                ],
+            )
+            .unwrap(),
+        ),
+        _ => None,
+    }
+}
+
 fn indefinite_pronoun(
     root: &str,
     bin_data: &BinData,
@@ -543,8 +639,8 @@ fn indefinite_pronoun(
                 model.clone(),
                 vec![
                     root,
-                    "Indefinite Pronoun",
                     definition,
+                    "Indefinite Pronoun",
                     &entry.masc_nom_sg.unwrap_or_else(|| "—".to_string()),
                     &entry.masc_acc_sg.unwrap_or_else(|| "—".to_string()),
                     &entry.masc_dat_sg.unwrap_or_else(|| "—".to_string()),
@@ -584,8 +680,8 @@ fn adjective(root: &str, bin_data: &BinData, definition: &str, model: &Model) ->
                 model.clone(),
                 vec![
                     root,
-                    "Adjective",
                     definition,
+                    "Adjective",
                     &adjective_entry.masc_nom_sg_strong.unwrap_or_else(|| "—".to_string()),
                     &adjective_entry.fem_nom_sg_strong.unwrap_or_else(|| "—".to_string()),
                     &adjective_entry.neut_nom_sg_strong.unwrap_or_else(|| "—".to_string()),
@@ -625,12 +721,12 @@ fn noun(root: &str, bin_data: &BinData, definition: &str, model: &Model) -> Opti
                 model.clone(),
                 vec![
                     root,
+                    definition,
                     match noun_entry.gender {
                         Gender::Masculine => "Masculine",
                         Gender::Feminine => "Feminine",
                         Gender::Neuter => "Neuter",
                     },
-                    definition,
                     &noun_entry.nom_sg.unwrap_or_else(|| "—".to_string()),
                     &noun_entry.nom_sg_def.unwrap_or_else(|| "—".to_string()),
                     &noun_entry.acc_sg.unwrap_or_else(|| "—".to_string()),

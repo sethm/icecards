@@ -12,6 +12,7 @@ pub enum Category {
     Phrase,
     Pronoun,
     IndefinitePronoun,
+    Number,
 }
 
 impl FromStr for Category {
@@ -26,6 +27,7 @@ impl FromStr for Category {
             "phrase" | "phrases" => Ok(Category::Phrase),
             "pronoun" | "pronouns" => Ok(Category::Pronoun),
             "indefinite_pronoun" | "indefinite_pronouns" => Ok(Category::IndefinitePronoun),
+            "number" | "numbers" => Ok(Category::Number),
             _ => Err(()),
         }
     }

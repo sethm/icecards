@@ -28,6 +28,10 @@ impl BinEntry {
     fn is_indefinite_pronoun(&self) -> bool {
         self.word_class == "fn"
     }
+
+    fn is_number(&self) -> bool {
+        self.word_class == "to"
+    }
 }
 
 #[derive(Debug, Eq, PartialEq)]
@@ -137,6 +141,22 @@ pub struct PronounEntry {
 }
 
 #[derive(Debug, Eq, PartialEq)]
+pub struct NumberEntry {
+    pub masc_nom: Option<String>,
+    pub masc_acc: Option<String>,
+    pub masc_dat: Option<String>,
+    pub masc_gen: Option<String>,
+    pub fem_nom: Option<String>,
+    pub fem_acc: Option<String>,
+    pub fem_dat: Option<String>,
+    pub fem_gen: Option<String>,
+    pub neut_nom: Option<String>,
+    pub neut_acc: Option<String>,
+    pub neut_dat: Option<String>,
+    pub neut_gen: Option<String>,
+}
+
+#[derive(Debug, Eq, PartialEq)]
 pub struct IndefinitePronounEntry {
     pub masc_nom_sg: Option<String>,
     pub masc_acc_sg: Option<String>,
@@ -237,6 +257,72 @@ impl BinData {
                 }
             }
             (_, _) => None,
+        }
+    }
+
+    pub fn number(&self, root: &str) -> Option<NumberEntry> {
+        let entries = self.data.get(root);
+
+        match entries {
+            Some(entries) => {
+                let entries = entries.iter().filter(|&e| e.is_number()).collect::<Vec<&BinEntry>>();
+
+                if entries.is_empty() {
+                    None
+                } else {
+                    Some(NumberEntry {
+                        masc_nom: entries
+                            .iter()
+                            .find(|&&e| e.tag == "KK-NFET" || e.tag == "KK-NFFT")
+                            .map(|&e| e.form.to_string()),
+                        masc_acc: entries
+                            .iter()
+                            .find(|&&e| e.tag == "KK-ÞFET" || e.tag == "KK-ÞFFT")
+                            .map(|&e| e.form.to_string()),
+                        masc_dat: entries
+                            .iter()
+                            .find(|&&e| e.tag == "KK-ÞGFET" || e.tag == "KK-ÞGFFT")
+                            .map(|&e| e.form.to_string()),
+                        masc_gen: entries
+                            .iter()
+                            .find(|&&e| e.tag == "KK-EFET" || e.tag == "KK-EFFT")
+                            .map(|&e| e.form.to_string()),
+                        fem_nom: entries
+                            .iter()
+                            .find(|&&e| e.tag == "KVK-NFET" || e.tag == "KVK-NFFT")
+                            .map(|&e| e.form.to_string()),
+                        fem_acc: entries
+                            .iter()
+                            .find(|&&e| e.tag == "KVK-ÞFET" || e.tag == "KVK-ÞFFT")
+                            .map(|&e| e.form.to_string()),
+                        fem_dat: entries
+                            .iter()
+                            .find(|&&e| e.tag == "KVK-ÞGFET" || e.tag == "KVK-ÞGFFT")
+                            .map(|&e| e.form.to_string()),
+                        fem_gen: entries
+                            .iter()
+                            .find(|&&e| e.tag == "KVK-EFET" || e.tag == "KVK-EFFT")
+                            .map(|&e| e.form.to_string()),
+                        neut_nom: entries
+                            .iter()
+                            .find(|&&e| e.tag == "HK-NFET" || e.tag == "HK-NFFT")
+                            .map(|&e| e.form.to_string()),
+                        neut_acc: entries
+                            .iter()
+                            .find(|&&e| e.tag == "HK-ÞFET" || e.tag == "HK-ÞFFT")
+                            .map(|&e| e.form.to_string()),
+                        neut_dat: entries
+                            .iter()
+                            .find(|&&e| e.tag == "HK-ÞGFET" || e.tag == "HK-ÞGFFT")
+                            .map(|&e| e.form.to_string()),
+                        neut_gen: entries
+                            .iter()
+                            .find(|&&e| e.tag == "HK-EFET" || e.tag == "HK-EFFT")
+                            .map(|&e| e.form.to_string()),
+                    })
+                }
+            }
+            None => None,
         }
     }
 
