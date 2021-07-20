@@ -24,6 +24,7 @@ const VERB_MODEL_ID: usize = 1625673414020;
 const ADVERB_MODEL_ID: usize = 1625673414030;
 const PHRASE_MODEL_ID: usize = 1625673414040;
 const PRONOUN_MODEL_ID: usize = 1625673414050;
+const INDEFINITE_PRONOUN_MODEL_ID: usize = 1625673414060;
 const DECK_ID: usize = 1625673415000;
 
 const CSS: &str = r#".card {
@@ -159,7 +160,7 @@ const NOUN_TMPL: &str = r#"{{FrontSide}}
 </table>"#;
 
 const ADJ_TMPL: &str = r#"{{FrontSide}}
-<p class="wclass">Adjective</p>
+<p class="wclass">{{Word Class}}</p>
 <p class="definition">{{Definition}}</p>
 <h3>Singular</h3>
 <table>
@@ -336,6 +337,38 @@ pub enum ProgramError {
     Anki(#[from] genanki_rs::Error),
 }
 
+fn common_fields() -> Vec<Field> {
+    vec![
+        Field::new("Root"),
+        Field::new("Word Class"),
+        Field::new("Definition"),
+        Field::new("Masculine Singular Nominative"),
+        Field::new("Feminine Singular Nominative"),
+        Field::new("Neuter Singular Nominative"),
+        Field::new("Masculine Singular Accusative"),
+        Field::new("Feminine Singular Accusative"),
+        Field::new("Neuter Singular Accusative"),
+        Field::new("Masculine Singular Dative"),
+        Field::new("Feminine Singular Dative"),
+        Field::new("Neuter Singular Dative"),
+        Field::new("Masculine Singular Genitive"),
+        Field::new("Feminine Singular Genitive"),
+        Field::new("Neuter Singular Genitive"),
+        Field::new("Masculine Plural Nominative"),
+        Field::new("Feminine Plural Nominative"),
+        Field::new("Neuter Plural Nominative"),
+        Field::new("Masculine Plural Accusative"),
+        Field::new("Feminine Plural Accusative"),
+        Field::new("Neuter Plural Accusative"),
+        Field::new("Masculine Plural Dative"),
+        Field::new("Feminine Plural Dative"),
+        Field::new("Neuter Plural Dative"),
+        Field::new("Masculine Plural Genitive"),
+        Field::new("Feminine Plural Genitive"),
+        Field::new("Neuter Plural Genitive"),
+    ]
+}
+
 fn generate_deck(
     dictionary: &Dictionary,
     bin_data: &BinData,
@@ -346,35 +379,22 @@ fn generate_deck(
     let adjective_model = Model::new_with_options(
         ADJECTIVE_MODEL_ID,
         "Icelandic Adjective",
-        vec![
-            Field::new("Root"),
-            Field::new("Definition"),
-            Field::new("Masculine Singular Nominative"),
-            Field::new("Feminine Singular Nominative"),
-            Field::new("Neuter Singular Nominative"),
-            Field::new("Masculine Singular Accusative"),
-            Field::new("Feminine Singular Accusative"),
-            Field::new("Neuter Singular Accusative"),
-            Field::new("Masculine Singular Dative"),
-            Field::new("Feminine Singular Dative"),
-            Field::new("Neuter Singular Dative"),
-            Field::new("Masculine Singular Genitive"),
-            Field::new("Feminine Singular Genitive"),
-            Field::new("Neuter Singular Genitive"),
-            Field::new("Masculine Plural Nominative"),
-            Field::new("Feminine Plural Nominative"),
-            Field::new("Neuter Plural Nominative"),
-            Field::new("Masculine Plural Accusative"),
-            Field::new("Feminine Plural Accusative"),
-            Field::new("Neuter Plural Accusative"),
-            Field::new("Masculine Plural Dative"),
-            Field::new("Feminine Plural Dative"),
-            Field::new("Neuter Plural Dative"),
-            Field::new("Masculine Plural Genitive"),
-            Field::new("Feminine Plural Genitive"),
-            Field::new("Neuter Plural Genitive"),
-        ],
+        common_fields(),
         vec![Template::new("Icelandic Adjective").qfmt("<h1>{{Root}}</h1>").afmt(ADJ_TMPL)],
+        Some(CSS),
+        None,
+        None,
+        None,
+        None,
+    );
+
+    let indef_pronoun_model = Model::new_with_options(
+        INDEFINITE_PRONOUN_MODEL_ID,
+        "Icelandic Indefinite Pronoun",
+        common_fields(),
+        vec![Template::new("Icelandic Indefinite Pronoun")
+            .qfmt("<h1>{{Root}}</h1>")
+            .afmt(ADJ_TMPL)],
         Some(CSS),
         None,
         None,
@@ -494,6 +514,9 @@ fn generate_deck(
             Category::Adverb => simple_note(&root, definition, &adverb_model),
             Category::Phrase => simple_note(&root, definition, &phrase_model),
             Category::Pronoun => pronoun(&root, bin_data, definition, &pronoun_model),
+            Category::IndefinitePronoun => {
+                indefinite_pronoun(&root, bin_data, definition, &indef_pronoun_model)
+            }
         };
 
         match note {
@@ -508,6 +531,52 @@ fn generate_deck(
     Ok(deck)
 }
 
+fn indefinite_pronoun(
+    root: &str,
+    bin_data: &BinData,
+    definition: &str,
+    model: &Model,
+) -> Option<Note> {
+    match bin_data.indefinite_pronoun(root) {
+        Some(entry) => Some(
+            Note::new(
+                model.clone(),
+                vec![
+                    root,
+                    "Indefinite Pronoun",
+                    definition,
+                    &entry.masc_nom_sg.unwrap_or_else(|| "—".to_string()),
+                    &entry.masc_acc_sg.unwrap_or_else(|| "—".to_string()),
+                    &entry.masc_dat_sg.unwrap_or_else(|| "—".to_string()),
+                    &entry.masc_gen_sg.unwrap_or_else(|| "—".to_string()),
+                    &entry.fem_nom_sg.unwrap_or_else(|| "—".to_string()),
+                    &entry.fem_acc_sg.unwrap_or_else(|| "—".to_string()),
+                    &entry.fem_dat_sg.unwrap_or_else(|| "—".to_string()),
+                    &entry.fem_gen_sg.unwrap_or_else(|| "—".to_string()),
+                    &entry.neut_nom_sg.unwrap_or_else(|| "—".to_string()),
+                    &entry.neut_acc_sg.unwrap_or_else(|| "—".to_string()),
+                    &entry.neut_dat_sg.unwrap_or_else(|| "—".to_string()),
+                    &entry.neut_gen_sg.unwrap_or_else(|| "—".to_string()),
+                    &entry.masc_nom_pl.unwrap_or_else(|| "—".to_string()),
+                    &entry.masc_acc_pl.unwrap_or_else(|| "—".to_string()),
+                    &entry.masc_dat_pl.unwrap_or_else(|| "—".to_string()),
+                    &entry.masc_gen_pl.unwrap_or_else(|| "—".to_string()),
+                    &entry.fem_nom_pl.unwrap_or_else(|| "—".to_string()),
+                    &entry.fem_acc_pl.unwrap_or_else(|| "—".to_string()),
+                    &entry.fem_dat_pl.unwrap_or_else(|| "—".to_string()),
+                    &entry.fem_gen_pl.unwrap_or_else(|| "—".to_string()),
+                    &entry.neut_nom_pl.unwrap_or_else(|| "—".to_string()),
+                    &entry.neut_acc_pl.unwrap_or_else(|| "—".to_string()),
+                    &entry.neut_dat_pl.unwrap_or_else(|| "—".to_string()),
+                    &entry.neut_gen_pl.unwrap_or_else(|| "—".to_string()),
+                ],
+            )
+            .unwrap(),
+        ),
+        _ => None,
+    }
+}
+
 fn adjective(root: &str, bin_data: &BinData, definition: &str, model: &Model) -> Option<Note> {
     match bin_data.adjective(root) {
         Some(adjective_entry) => Some(
@@ -515,6 +584,7 @@ fn adjective(root: &str, bin_data: &BinData, definition: &str, model: &Model) ->
                 model.clone(),
                 vec![
                     root,
+                    "Adjective",
                     definition,
                     &adjective_entry.masc_nom_sg_strong.unwrap_or_else(|| "—".to_string()),
                     &adjective_entry.fem_nom_sg_strong.unwrap_or_else(|| "—".to_string()),

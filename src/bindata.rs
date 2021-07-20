@@ -24,6 +24,10 @@ impl BinEntry {
     fn is_verb(&self) -> bool {
         self.word_class == "so"
     }
+
+    fn is_indefinite_pronoun(&self) -> bool {
+        self.word_class == "fn"
+    }
 }
 
 #[derive(Debug, Eq, PartialEq)]
@@ -132,6 +136,34 @@ pub struct PronounEntry {
     pub gen: Option<String>,
 }
 
+#[derive(Debug, Eq, PartialEq)]
+pub struct IndefinitePronounEntry {
+    pub masc_nom_sg: Option<String>,
+    pub masc_acc_sg: Option<String>,
+    pub masc_dat_sg: Option<String>,
+    pub masc_gen_sg: Option<String>,
+    pub fem_nom_sg: Option<String>,
+    pub fem_acc_sg: Option<String>,
+    pub fem_dat_sg: Option<String>,
+    pub fem_gen_sg: Option<String>,
+    pub neut_nom_sg: Option<String>,
+    pub neut_acc_sg: Option<String>,
+    pub neut_dat_sg: Option<String>,
+    pub neut_gen_sg: Option<String>,
+    pub masc_nom_pl: Option<String>,
+    pub masc_acc_pl: Option<String>,
+    pub masc_dat_pl: Option<String>,
+    pub masc_gen_pl: Option<String>,
+    pub fem_nom_pl: Option<String>,
+    pub fem_acc_pl: Option<String>,
+    pub fem_dat_pl: Option<String>,
+    pub fem_gen_pl: Option<String>,
+    pub neut_nom_pl: Option<String>,
+    pub neut_acc_pl: Option<String>,
+    pub neut_dat_pl: Option<String>,
+    pub neut_gen_pl: Option<String>,
+}
+
 pub struct BinData {
     pub data: BTreeMap<String, Vec<BinEntry>>,
 }
@@ -205,6 +237,123 @@ impl BinData {
                 }
             }
             (_, _) => None,
+        }
+    }
+
+    pub fn indefinite_pronoun(&self, root: &str) -> Option<IndefinitePronounEntry> {
+        let entries = self.data.get(root);
+
+        match entries {
+            Some(entries) => {
+                let entries = entries
+                    .iter()
+                    .filter(|&e| e.is_indefinite_pronoun())
+                    .collect::<Vec<&BinEntry>>();
+
+                if entries.is_empty() {
+                    None
+                } else {
+                    Some(IndefinitePronounEntry {
+                        masc_nom_sg: entries
+                            .iter()
+                            .find(|&&e| e.tag == "KK-NFET")
+                            .map(|&e| e.form.to_string()),
+                        masc_acc_sg: entries
+                            .iter()
+                            .find(|&&e| e.tag == "KK-ÞFET")
+                            .map(|&e| e.form.to_string()),
+                        masc_dat_sg: entries
+                            .iter()
+                            .find(|&&e| e.tag == "KK-ÞGFET")
+                            .map(|&e| e.form.to_string()),
+                        masc_gen_sg: entries
+                            .iter()
+                            .find(|&&e| e.tag == "KK-EFET")
+                            .map(|&e| e.form.to_string()),
+                        fem_nom_sg: entries
+                            .iter()
+                            .find(|&&e| e.tag == "KVK-NFET")
+                            .map(|&e| e.form.to_string()),
+                        fem_acc_sg: entries
+                            .iter()
+                            .find(|&&e| e.tag == "KVK-ÞFET")
+                            .map(|&e| e.form.to_string()),
+                        fem_dat_sg: entries
+                            .iter()
+                            .find(|&&e| e.tag == "KVK-ÞGFET")
+                            .map(|&e| e.form.to_string()),
+                        fem_gen_sg: entries
+                            .iter()
+                            .find(|&&e| e.tag == "KVK-EFET")
+                            .map(|&e| e.form.to_string()),
+                        neut_nom_sg: entries
+                            .iter()
+                            .find(|&&e| e.tag == "HK-NFET")
+                            .map(|&e| e.form.to_string()),
+                        neut_acc_sg: entries
+                            .iter()
+                            .find(|&&e| e.tag == "HK-ÞFET")
+                            .map(|&e| e.form.to_string()),
+                        neut_dat_sg: entries
+                            .iter()
+                            .find(|&&e| e.tag == "HK-ÞGFET")
+                            .map(|&e| e.form.to_string()),
+                        neut_gen_sg: entries
+                            .iter()
+                            .find(|&&e| e.tag == "HK-EFET")
+                            .map(|&e| e.form.to_string()),
+                        masc_nom_pl: entries
+                            .iter()
+                            .find(|&&e| e.tag == "KK-NFFT")
+                            .map(|&e| e.form.to_string()),
+                        masc_acc_pl: entries
+                            .iter()
+                            .find(|&&e| e.tag == "KK-ÞFFT")
+                            .map(|&e| e.form.to_string()),
+                        masc_dat_pl: entries
+                            .iter()
+                            .find(|&&e| e.tag == "KK-ÞGFFT")
+                            .map(|&e| e.form.to_string()),
+                        masc_gen_pl: entries
+                            .iter()
+                            .find(|&&e| e.tag == "KK-EFFT")
+                            .map(|&e| e.form.to_string()),
+                        fem_nom_pl: entries
+                            .iter()
+                            .find(|&&e| e.tag == "KVK-NFFT")
+                            .map(|&e| e.form.to_string()),
+                        fem_acc_pl: entries
+                            .iter()
+                            .find(|&&e| e.tag == "KVK-ÞFFT")
+                            .map(|&e| e.form.to_string()),
+                        fem_dat_pl: entries
+                            .iter()
+                            .find(|&&e| e.tag == "KVK-ÞGFFT")
+                            .map(|&e| e.form.to_string()),
+                        fem_gen_pl: entries
+                            .iter()
+                            .find(|&&e| e.tag == "KVK-EFFT")
+                            .map(|&e| e.form.to_string()),
+                        neut_nom_pl: entries
+                            .iter()
+                            .find(|&&e| e.tag == "HK-NFFT")
+                            .map(|&e| e.form.to_string()),
+                        neut_acc_pl: entries
+                            .iter()
+                            .find(|&&e| e.tag == "HK-ÞFFT")
+                            .map(|&e| e.form.to_string()),
+                        neut_dat_pl: entries
+                            .iter()
+                            .find(|&&e| e.tag == "HK-ÞGFFT")
+                            .map(|&e| e.form.to_string()),
+                        neut_gen_pl: entries
+                            .iter()
+                            .find(|&&e| e.tag == "HK-EFFT")
+                            .map(|&e| e.form.to_string()),
+                    })
+                }
+            }
+            None => None,
         }
     }
 

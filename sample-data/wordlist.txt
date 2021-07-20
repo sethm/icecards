@@ -131,6 +131,12 @@ vonandi	adverb	hopefully
 þangað	adverb	there, over there
 örugglega	adverb	1. certainly, definitely; 2. with assurance, assuredly
 allur	indefinite_pronoun	1. whole, all; 2. complete, total
+annar	indefinite_pronoun	1. another, other; 2. second; 3. one (of two)
+báðir	indefinite_pronoun	both
+einhver	indefinite_pronoun	somebody, someone, some
+enginn	indefinite_pronoun	no one, nobody, nothing
+nokkur	indefinite_pronoun	a few; sombeody; anyone; anything
+sumur	indefinite_pronoun	some
 aðalhlutverk	noun	main role (acting)
 afi	noun	grandfather, grandpa
 afmælisveisla	noun	birthday party
