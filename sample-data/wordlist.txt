@@ -165,6 +165,7 @@ bók	noun	book
 brauð	noun	bread, loaf of bread
 bréf	noun	letter (mail)
 bróðir	noun	brother
+brún	noun	edge, brink
 búð	noun	shop
 dagblað	noun	daily newspaper
 dagskrá	noun	program, agenda, order of the day
@@ -206,12 +207,15 @@ gaman	noun	fun, enjoyment
 gangstétt	noun	sidewalk
 gata	noun	street, way, path
 geisladiskur	noun	compact disc, CD
+gil	noun	gully, ravine
 gisting	noun	night's lodging
 greiða	noun	comb
 grein	noun	1. branch, bough; 2. subject, field; 3. article; 4. paragraph; 5. point
 gráða	noun	degree
+göngubrú	noun	footbridge
 gönguferð	noun	walk, hike
 gönguleið	noun	path, trail
+göngustígur	noun	footpath, pathway
 handklæði	noun	towel
 handrit	noun	manuscript
 hangikjöt	noun	smoked meat (esp. lamb)	
@@ -222,6 +226,7 @@ hárþurrka	noun	hair dryer
 herbergi	noun	room
 hestur	noun	horse
 hiti	noun	heat, warmth
+hljómsveit	noun	orchestra, band
 hlutur	noun	1. thing, object; 2. part, share
 hlutverk	noun	1. task; 2. mission, role
 hnífur	noun	knife
@@ -241,11 +246,13 @@ kennari	noun	teacher
 kirkja	noun	church
 kílómetri	noun	kilometer
 klukka	noun	clock
+klukkustund	noun	hour
 kona	noun	woman
 kóngur	noun	king
 kort	noun	1. map; 2. postcard, card
 kóramót	noun	choir meet
 kórstjóri	noun	choir director
+krakki	noun	kid, child
 króna	noun	1. Icelandic currency; 2. tree-top, crown of a tree
 kveðja	noun	greeting
 kvikmynd	noun	film, movie
@@ -254,7 +261,9 @@ kyn	noun	gender, sex
 kyrrð	noun	1. silence, stillness; 2. peace and quiet
 lag	noun	1. tune, melody; 2. layer; 3. way, method
 land	noun	1. land, earth; 2. country
+landslag	noun	landscape
 laugardagur	noun	Saturday
+leið	noun	way, route
 leiðsögumaður	noun	guide, travel guide
 leikstjóri	noun	director (of a film, play)
 leikur	noun	1. playing, play; 2. game; 3. acting
@@ -278,8 +287,10 @@ matur	noun	food
 málverk	noun	painting
 mánudagur	noun	Monday
 meðlimur	noun	member
+megin	noun	larger part, main part
 meistari	noun	master, maestro (in music)
 menntaskóli	noun	high school, grammar school
+metri	noun	meter
 miðbær	noun	city center, downtown area
 miði	noun	1. slip of paper, note; 2. ticket
 miðvikudagur	noun	Wednesday
@@ -380,6 +391,7 @@ upptaka	noun	recording
 vatn	noun	1. water; 2. lake
 veðurspá	noun	weather forecast
 vefsíða	noun	web page
+vegur	noun	road, way
 veitingahús	noun	restaurant
 veitingastaður	noun	restaurant
 verðlaun	noun	1. prize, award; 2. reward
@@ -407,11 +419,13 @@ einn	number	one
 tveir	number	two
 þrír	number	three
 fjórir	number	four
+að halda áfram	phrase	to keep going, carry on
 að sjálfsögðu!	phrase	obviously!
 að taka þátt í ...	phrase	to take part in ...
 að telja upp að tíu	phrase	To count up to ten
 alls konar ...	phrase	all kinds of ...
 allt í lagi	phrase	OK, alright
+fossinn er 62 metrar á hæð	phrase	the waterfall is 62 meters high
 á morgun	phrase	tomorrow
 bæði ... og	phrase	both ... and
 eins og ...	phrase	like ..., in the manner of ...
@@ -420,8 +434,11 @@ ekki alveg	phrase	not quite
 ekki satt	phrase	isn't that right?
 er hægt að ...	phrase	It's possible to ...
 eiga von á ...	phrase	to expect ...
+ég hlakka til ...	phrase	I look forward to ...
+ég kvíði fyrir ...	phrase	I'm anxious about ...
 ég er ósammála	phrase	I don't agree
 ég ætla að fá ...	phrase	I'd like to have ...
+fyrir ofan	phrase	above
 gaman að hitta þér	phrase	Nice to meet you
 gaman að kynnast þér	phrase	Nice to know you
 gjörðu svo vel	phrase	Here you go
@@ -472,6 +489,7 @@ ganga	verb	1. to walk, go on foot; 2. to move, run, go; 3. to go around, be pass
 gista	verb	to stay the night
 gleyma	verb	to forget
 hafa	verb	1. to have; 2. to hold, have; 3. to keep
+halda	verb	1. to hold (e.g. a meeting); 2. to think, believe
 hefja	verb	1. begin, commence; 2. raise, lift
 heita	verb	to be called, named
 hjálpa	verb	to help
@@ -488,6 +506,7 @@ labba	verb	to walk slowly, stroll
 láta	verb	1. to let, make, have; 2. to put
 leika	verb	1. to play; 2. to act
 leita	verb	to search, look for
+liggja	verb	to stand, lie, be located
 læra	verb	to learn, study
 mála	verb	to paint
 muna	verb	to remember
