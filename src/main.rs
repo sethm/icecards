@@ -575,16 +575,16 @@ fn generate_deck(
         let root = &key.root;
 
         let note = match key.category {
-            Category::Noun => noun(&root, bin_data, definition, &noun_model),
-            Category::Adjective => adjective(&root, bin_data, definition, &adjective_model),
-            Category::Verb => verb(&root, bin_data, definition, &verb_model),
-            Category::Adverb => simple_note(&root, definition, &adverb_model),
-            Category::Phrase => simple_note(&root, definition, &phrase_model),
-            Category::Pronoun => pronoun(&root, bin_data, definition, &pronoun_model),
+            Category::Noun => noun(root, bin_data, definition, &noun_model),
+            Category::Adjective => adjective(root, bin_data, definition, &adjective_model),
+            Category::Verb => verb(root, bin_data, definition, &verb_model),
+            Category::Adverb => simple_note(root, definition, &adverb_model),
+            Category::Phrase => simple_note(root, definition, &phrase_model),
+            Category::Pronoun => pronoun(root, bin_data, definition, &pronoun_model),
             Category::IndefinitePronoun => {
-                indefinite_pronoun(&root, bin_data, definition, &indef_pronoun_model)
+                indefinite_pronoun(root, bin_data, definition, &indef_pronoun_model)
             }
-            Category::Number => number(&root, bin_data, definition, &number_model),
+            Category::Number => number(root, bin_data, definition, &number_model),
         };
 
         match note {
@@ -930,7 +930,7 @@ async fn ensure_bin_data_exists(config: &AppConfig) -> Result<(), ProgramError> 
     let _ = std::io::stdin().read_line(&mut input)?;
 
     if input.trim().to_ascii_lowercase().starts_with('y') {
-        get_bin_csv(&config).await?;
+        get_bin_csv(config).await?;
         Ok(())
     } else {
         Err(ProgramError::BinData)
