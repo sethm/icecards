@@ -1,7 +1,7 @@
 use crate::bindata::{BinData, Gender};
 use crate::dictionary::{Category, Dictionary};
 use clap::{App, Arg};
-use directories_next::ProjectDirs;
+use directories::ProjectDirs;
 use genanki_rs::{Deck, Field, Model, Note, Template};
 use std::fs::File;
 use std::io::{self, Write};
